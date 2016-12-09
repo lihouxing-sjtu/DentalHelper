@@ -64,6 +64,15 @@ DentalHelper::DentalHelper(QWidget *parent)
 	m_ResliceMapperForArchCurve = vtkSmartPointer<vtkImageResliceMapper>::New();
 	m_ReslicePropForArchCurve = vtkSmartPointer<vtkImageSlice>::New();
 
+	m_ContourRepForArchCurve = vtkSmartPointer<vtkOrientedGlyphContourRepresentation>::New();
+	m_ContourWidgetForArchCurve = vtkSmartPointer<vtkContourWidget>::New();
+	m_ContourLineInterpolator = vtkSmartPointer<vtkBezierContourLineInterpolator>::New();
+	m_ContourLineInterpolator->SetMaximumCurveLineSegments(200);
+	m_ContourFocalPlanePlacer = vtkSmartPointer<vtkFocalPlanePointPlacer>::New();
+	m_ContourInitialData = vtkSmartPointer<vtkPolyData>::New();
+
+
+
 	m_EventQtConnector = vtkSmartPointer<vtkEventQtSlotConnect>::New();
 
 
@@ -367,6 +376,68 @@ void DentalHelper::DrawSagitalLine()
 	m_LowerLeftRenderer->ResetCamera();
 	m_LowerLeftRendWin->Render();
 }
+void DentalHelper::GenerateContourWidgetPolydata()
+{
+	QSettings widgetPoints;
+	int numOfPoints;
+	//判断是否存在上次选择的点
+	if (widgetPoints.value("numOfPoints").isValid())
+	{
+		numOfPoints = widgetPoints.value("numOfPoints").toInt();
+		auto points = vtkSmartPointer<vtkPoints>::New();
+		points->Initialize();
+		auto cellArrary = vtkSmartPointer<vtkCellArray>::New();
+		cellArrary->Initialize();
+		auto idlist = vtkSmartPointer<vtkIdList>::New();
+		idlist->Initialize();
+		for (int i = 0; i < numOfPoints; i++)
+		{
+			double temp[3];
+			QString nameOfPoint = "Point";
+			QString nameOfIndex;
+			temp[0] = widgetPoints.value(nameOfPoint + nameOfIndex.setNum(i) + "x").toDouble();
+			temp[1] = widgetPoints.value(nameOfPoint + nameOfIndex.setNum(i) + "y").toDouble();
+			temp[2] = widgetPoints.value(nameOfPoint + nameOfIndex.setNum(i) + "z").toDouble();
+			points->InsertNextPoint(temp);
+			idlist->InsertNextId(i);
+		}
+		cellArrary->InsertNextCell(idlist);
+		m_ContourInitialData->SetPoints(points);
+		m_ContourInitialData->SetLines(cellArrary);
+	}
+	else
+	{
+		auto plane = vtkSmartPointer<vtkPlane>::New();
+		m_PlaneWidgetForArchCurve->GetPlane(plane);
+		int numPts = 5;
+		auto points = vtkSmartPointer<vtkPoints>::New();
+		points->Initialize();
+		auto idlist = vtkSmartPointer<vtkIdList>::New();
+		idlist->Initialize();
+		auto cellArrary = vtkSmartPointer<vtkCellArray>::New();
+		cellArrary->Initialize();
+		for (int i = 0; i < numPts; i++)
+		{
+			// Create numPts points evenly spread around a circumference of radius 10
+
+			const double angle = vtkMath::Pi()*i / numPts;
+			double p[3];
+			p[0] = 10 * cos(angle) + m_PlaneWidgetForArchCurve->GetCenter()[0];
+			p[1] = 10 * sin(angle) + m_PlaneWidgetForArchCurve->GetCenter()[1];
+			p[3] = 0;
+			plane->ProjectPoint(p, p);
+			points->InsertNextPoint(p);
+			idlist->InsertNextId(i);
+		}
+		// Create a cell array to connect the points into meaningful geometry
+		cellArrary->InsertNextCell(idlist);
+		m_ContourInitialData->SetPoints(points);
+		m_ContourInitialData->SetLines(cellArrary);
+	}
+
+}
+
+
 void DentalHelper::GetRandomColor(double* rgb, int differ)
 {
 	QTime time = QTime::currentTime();//获取系统现在的时间
@@ -462,6 +533,31 @@ void DentalHelper::InitializeView()
 	m_LowerLeftInteractor->Initialize();
 	this->SetWindowText(m_LowerLeftRenderer, "Coronal View", CoronalColor);
 }
+
+void DentalHelper::OnContourWidgetForArchCurveInteraction()
+{
+	auto contourData_ = vtkSmartPointer<vtkPolyData>::New();
+	m_ContourRepForArchCurve->GetNodePolyData(contourData_);
+	auto points_ = vtkSmartPointer<vtkPoints>::New();
+	points_=contourData_->GetPoints();
+	//将特定点存在注册表中
+	int numOfPoints = points_->GetNumberOfPoints();
+	QSettings widgetPoints;
+	widgetPoints.setValue("numOfPoints", numOfPoints);
+	for (int i = 0; i < numOfPoints; i++)
+	{
+		double temp[3];
+		points_->GetPoint(i, temp);
+		QString nameOfPoint = "Point";
+		QString nameOfIndex;
+		widgetPoints.setValue(nameOfPoint + nameOfIndex.setNum(i) + "x",temp[0]);
+		widgetPoints.setValue(nameOfPoint + nameOfIndex.setNum(i) + "y", temp[1]);
+		widgetPoints.setValue(nameOfPoint + nameOfIndex.setNum(i) + "z", temp[2]);
+	}
+
+}
+
+
 void DentalHelper::OnImageTableCellClicked(int row, int columm)
 {
 	if (columm==0)
@@ -1178,7 +1274,29 @@ void DentalHelper::SetViewModel2Preplan()
 	}
 	m_UpRightRendWin->Render();
 
+	//初始化contour widget
+	this->GenerateContourWidgetPolydata();//初始化contour widget 的点
+	m_ContourRepForArchCurve->SetPointPlacer(m_ContourFocalPlanePlacer);
+	m_ContourRepForArchCurve->SetLineInterpolator(m_ContourLineInterpolator);
+	m_ContourRepForArchCurve->AlwaysOnTopOn();
+	m_ContourRepForArchCurve->GetLinesProperty()->SetLineWidth(5);
+	m_ContourRepForArchCurve->GetLinesProperty()->SetColor(0.6, 0.4, 0.6);
+	m_ContourRepForArchCurve->GetProperty()->SetColor(0.4, 0.2, 0.5);
+	m_ContourRepForArchCurve->GetProperty()->SetPointSize(4);
+	m_ContourWidgetForArchCurve->SetInteractor(m_UpRightInteractor);
+	m_ContourWidgetForArchCurve->FollowCursorOff();
+	m_ContourWidgetForArchCurve->SetRepresentation(m_ContourRepForArchCurve);
+	m_ContourWidgetForArchCurve->On();
+	m_ContourWidgetForArchCurve->Initialize(m_ContourInitialData);
+	m_UpRightRenderer->ResetCamera();
+	m_UpRightRendWin->Render();
+	m_EventQtConnector->Connect(m_ContourWidgetForArchCurve, vtkCommand::InteractionEvent, this, SLOT(OnContourWidgetForArchCurveInteraction()));
+
+	//隐藏左下角视图，coronal的actor
 	this->SetActorsVisibilityInCoronal(false);
+	this->SetWindowText(m_LowerLeftRenderer, "Panaromic View", CoronalColor);
+	//显示全镜面
+
 	this->SetActorsVisibilityInSagital(false);
 
 
@@ -1335,7 +1453,7 @@ void DentalHelper::UpDateCamera(vtkRenderer* ren, double* referenceNormal, doubl
 	camera->SetFocalPoint(focusPoint);
 	camera->SetPosition(newPosition);
 	camera->SetViewUp(viewUp);
-
+	camera->OrthogonalizeViewUp();
 	ren->GetRenderWindow()->Render();
 }
 

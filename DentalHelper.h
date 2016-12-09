@@ -114,6 +114,13 @@ private:
 	//画牙弓曲线的面
 	vtkSmartPointer<vtkImageResliceMapper> m_ResliceMapperForArchCurve;
 	vtkSmartPointer<vtkImageSlice> m_ReslicePropForArchCurve;
+	//牙弓曲线的contourwidget
+	vtkSmartPointer<vtkContourWidget> m_ContourWidgetForArchCurve;
+	vtkSmartPointer<vtkOrientedGlyphContourRepresentation> m_ContourRepForArchCurve;
+	vtkSmartPointer<vtkBezierContourLineInterpolator> m_ContourLineInterpolator;
+	vtkSmartPointer<vtkFocalPlanePointPlacer> m_ContourFocalPlanePlacer;
+
+	vtkSmartPointer<vtkPolyData> m_ContourInitialData;
 
 	//读取DICOM
 	void ReadImageFile(QString dir);
@@ -157,6 +164,8 @@ private:
 
 	//设置相机参数，正对图像
 	void UpDateCamera(vtkRenderer* ren, double* referenceNormal, double angle);
+	//生成contour的点
+	void GenerateContourWidgetPolydata();
 protected slots:
 
 	//对Load Button的响应函数
@@ -192,4 +201,6 @@ protected slots:
 
 	//planewidget交互时，更新画牙弓曲线的面
 	void OnPlaneWidgetForArchCurveInteraction();
+	//牙弓曲线contour widget交互响应函数
+	void OnContourWidgetForArchCurveInteraction();
 };
