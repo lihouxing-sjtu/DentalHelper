@@ -121,6 +121,21 @@ private:
 	vtkSmartPointer<vtkFocalPlanePointPlacer> m_ContourFocalPlanePlacer;
 
 	vtkSmartPointer<vtkPolyData> m_ContourInitialData;
+	//cross imageslice
+	vtkSmartPointer<vtkImageResliceMapper> m_ResliceMapperOfCrossInModel;
+	vtkSmartPointer<vtkImageSlice> m_ReslicePropOfCrossInModel;
+	vtkSmartPointer<vtkImageResliceMapper> m_ResliceMapperOfCrossIn2D;
+	vtkSmartPointer<vtkImageSlice> m_ReslicePropOfCrossIn2D;
+	//保存contour widget 上的点，并进行插值
+	vtkSmartPointer<vtkSplineFilter> m_ContourSplineFilter;
+	//偏移的曲线及actor
+	vtkSmartPointer<vtkSplineFilter> m_ContourOffSetSplineFilter;
+	vtkSmartPointer<vtkActor> m_ContourOffSetActor;
+	//cross plane
+	vtkSmartPointer<vtkPlane> m_CrossPlane;
+	//panaromic in model
+	vtkSmartPointer<vtkProbeFilter> m_PanaromicProbeFilterInModel;
+	vtkSmartPointer<vtkActor> m_PanaromicActorInModel;
 
 	//读取DICOM
 	void ReadImageFile(QString dir);
@@ -166,6 +181,14 @@ private:
 	void UpDateCamera(vtkRenderer* ren, double* referenceNormal, double angle);
 	//生成contour的点
 	void GenerateContourWidgetPolydata();
+	//生成cross reslice
+	void GenerateCrossReslice();
+	//生成offset spline
+	void GenerateOffSetSpline();
+	//生成panaromic slice
+	void GeneratePanaromicReslice();
+	//生成直纹面
+	void GenerateRuledSurface(vtkPoints* p1, vtkPoints* p2,vtkPolyData*);
 protected slots:
 
 	//对Load Button的响应函数
@@ -203,4 +226,5 @@ protected slots:
 	void OnPlaneWidgetForArchCurveInteraction();
 	//牙弓曲线contour widget交互响应函数
 	void OnContourWidgetForArchCurveInteraction();
+
 };

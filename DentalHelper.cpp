@@ -71,7 +71,20 @@ DentalHelper::DentalHelper(QWidget *parent)
 	m_ContourFocalPlanePlacer = vtkSmartPointer<vtkFocalPlanePointPlacer>::New();
 	m_ContourInitialData = vtkSmartPointer<vtkPolyData>::New();
 
+	m_ResliceMapperOfCrossInModel = vtkSmartPointer<vtkImageResliceMapper>::New();
+	m_ReslicePropOfCrossInModel = vtkSmartPointer<vtkImageSlice>::New();
 
+	m_ResliceMapperOfCrossIn2D = vtkSmartPointer<vtkImageResliceMapper>::New();
+	m_ReslicePropOfCrossIn2D = vtkSmartPointer<vtkImageSlice>::New();
+
+	m_ContourSplineFilter = vtkSmartPointer<vtkSplineFilter>::New();
+	m_ContourOffSetSplineFilter = vtkSmartPointer<vtkSplineFilter>::New();
+	m_ContourOffSetActor = vtkSmartPointer<vtkActor>::New();
+
+	m_CrossPlane = vtkSmartPointer<vtkPlane>::New();
+
+	m_PanaromicProbeFilterInModel = vtkSmartPointer<vtkProbeFilter>::New();
+	m_PanaromicActorInModel = vtkSmartPointer<vtkActor>::New();
 
 	m_EventQtConnector = vtkSmartPointer<vtkEventQtSlotConnect>::New();
 
@@ -436,7 +449,296 @@ void DentalHelper::GenerateContourWidgetPolydata()
 	}
 
 }
+void DentalHelper::GenerateCrossReslice()
+{
+	//获得曲线上所有的点
+	auto splinePoints = vtkSmartPointer<vtkPoints>::New();
+	splinePoints = m_ContourSplineFilter->GetOutput()->GetPoints();
 
+	//获得牙弓曲线所在平面
+	auto plane = vtkSmartPointer<vtkPlane>::New();
+	m_PlaneWidgetForArchCurve->GetPlane(plane);
+
+	//获得当前点
+	double point1[3], point2[3];
+	splinePoints->GetPoint(ui.LowerRightSlider->value(), point1);
+	splinePoints->GetPoint(ui.LowerRightSlider->value()+1, point2);
+	//投影到平面上
+	plane->ProjectPoint(point1, point1);
+	plane->ProjectPoint(point2, point2);
+	//计算cross plane的法向量
+	double normalOfCrossPlane_[3];
+	for (int i=0;i<3;i++)
+	{
+		normalOfCrossPlane_[i] = point1[i] - point2[i];
+	}
+	vtkMath::Normalize(normalOfCrossPlane_);
+	m_CrossPlane->SetOrigin(point1);
+	m_CrossPlane->SetNormal(normalOfCrossPlane_);
+
+	//设置slice in model view
+	auto propertySlice = vtkSmartPointer<vtkImageProperty>::New();
+	propertySlice->SetColorWindow(ui.WindowSlider->value());
+	propertySlice->SetColorLevel(ui.LevelSlider->value());
+	propertySlice->SetAmbient(1);
+	propertySlice->SetDiffuse(1.0);
+	propertySlice->SetOpacity(1.0);
+	propertySlice->SetInterpolationTypeToLinear();
+
+	m_ResliceMapperOfCrossInModel->SetInputData(m_ImageData);
+	m_ResliceMapperOfCrossInModel->SetSlicePlane(m_CrossPlane);
+
+	m_ReslicePropOfCrossInModel->SetMapper(m_ResliceMapperOfCrossInModel);
+	m_ReslicePropOfCrossInModel->SetProperty(propertySlice);
+	if (!m_ModelRenderer->GetViewProps()->IsItemPresent(m_ReslicePropOfCrossInModel))
+	{
+		m_ModelRenderer->AddViewProp(m_ReslicePropOfCrossInModel);
+	}
+	m_ModelRendWin->Render();
+	//设置slice in 2D view
+	m_ResliceMapperOfCrossIn2D->SetInputData(m_ImageData);
+	m_ResliceMapperOfCrossIn2D->SetSlicePlane(m_CrossPlane);
+	
+	m_ReslicePropOfCrossIn2D->SetMapper(m_ResliceMapperOfCrossIn2D);
+	m_ReslicePropOfCrossIn2D->SetProperty(propertySlice);
+	if (!m_LowerRightRenderer->GetViewProps()->IsItemPresent(m_ReslicePropOfCrossIn2D))
+	{
+		m_LowerRightRenderer->AddViewProp(m_ReslicePropOfCrossIn2D);
+	}
+	this->UpDateCamera(m_LowerRightRenderer, normalOfCrossPlane_, 90);
+	m_LowerRightRendWin->Render();
+
+
+}
+
+void DentalHelper::GenerateOffSetSpline()
+{
+	//获得牙弓曲线所在平面
+	auto planeForArchCurve = vtkSmartPointer<vtkPlane>::New();
+	m_PlaneWidgetForArchCurve->GetPlane(planeForArchCurve);
+	//获得contour widget的点
+	auto polydataOfOffSet = vtkSmartPointer<vtkPolyData>::New();
+	polydataOfOffSet->DeepCopy(m_ContourRepForArchCurve->GetContourRepresentationAsPolyData());
+	auto pointsOfContour_ = vtkSmartPointer<vtkPoints>::New();
+	pointsOfContour_ = polydataOfOffSet->GetPoints();
+	int numOfPointsOfContour = pointsOfContour_->GetNumberOfPoints();	
+
+	//offset的点
+	auto pointsOfOffSet = vtkSmartPointer<vtkPoints>::New();
+	pointsOfOffSet->Initialize();
+	for (int i = 0; i < numOfPointsOfContour; i++)
+	{
+		double firstPoint_[3], nextPoint_[3], normalOfPoints[3], normalOfOffset[3];
+		double newPoint[3];
+		if (i < numOfPointsOfContour - 1)//如果不是最后一个点
+		{
+			pointsOfContour_->GetPoint(i, firstPoint_);
+			pointsOfContour_->GetPoint(i + 1, nextPoint_);
+			planeForArchCurve->ProjectPoint(firstPoint_, firstPoint_);
+			planeForArchCurve->ProjectPoint(nextPoint_, nextPoint_);
+			vtkMath::Subtract(nextPoint_, firstPoint_, normalOfPoints);
+			vtkMath::Normalize(normalOfPoints);
+			vtkMath::Cross(m_PlaneWidgetForArchCurve->GetNormal(), normalOfPoints, normalOfOffset);
+			for (int j = 0; j < 3; j++)
+			{
+				newPoint[j] = firstPoint_[j] + normalOfOffset[j] * 0.1*ui.LowerLeftSlider->value();
+			}
+		}
+		else
+		{
+			pointsOfContour_->GetPoint(i - 1, firstPoint_);
+			pointsOfContour_->GetPoint(i, nextPoint_);
+			planeForArchCurve->ProjectPoint(firstPoint_, firstPoint_);
+			planeForArchCurve->ProjectPoint(nextPoint_, nextPoint_);
+
+			vtkMath::Subtract(nextPoint_, firstPoint_, normalOfPoints);
+			vtkMath::Normalize(normalOfPoints);
+			vtkMath::Cross(m_PlaneWidgetForArchCurve->GetNormal(), normalOfPoints, normalOfOffset);
+			for (int j = 0; j < 3; j++)
+			{
+				newPoint[j] = nextPoint_[j] + normalOfOffset[j] * 0.1*ui.LowerLeftSlider->value();
+			}
+		}	
+		pointsOfOffSet->InsertNextPoint(newPoint);
+	}
+
+	polydataOfOffSet->SetPoints(pointsOfOffSet);
+
+	auto cardinalSplineOffSet = vtkSmartPointer<vtkCardinalSpline>::New();
+	cardinalSplineOffSet->SetLeftConstraint(2);
+	cardinalSplineOffSet->SetRightConstraint(2);
+	cardinalSplineOffSet->SetLeftValue(0);
+	cardinalSplineOffSet->SetRightValue(0);
+	m_ContourOffSetSplineFilter->SetSpline(cardinalSplineOffSet);
+	m_ContourOffSetSplineFilter->SetInputData(polydataOfOffSet);
+	m_ContourOffSetSplineFilter->SetSubdivideToSpecified();
+	m_ContourOffSetSplineFilter->SetNumberOfSubdivisions(m_ContourSplineFilter->GetOutput()->GetNumberOfPoints() - 1);
+	m_ContourOffSetSplineFilter->Update();
+
+	auto offsetMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	offsetMapper->SetInputData(m_ContourOffSetSplineFilter->GetOutput());
+	offsetMapper->ScalarVisibilityOff();
+	m_ContourOffSetActor->SetMapper(offsetMapper);
+	m_ContourOffSetActor->GetProperty()->SetColor(0.2, 0.8, 0.5);
+	m_ContourOffSetActor->GetProperty()->SetLineWidth(3);
+	if (!m_UpRightRenderer->GetActors()->IsItemPresent(m_ContourOffSetActor))
+	{
+		m_UpRightRenderer->AddActor(m_ContourOffSetActor);
+	}
+	m_UpRightRendWin->Render();
+}
+
+void DentalHelper::GeneratePanaromicReslice()
+{
+	//获得widget 的法向量，以此决定移动的方向
+	double normalOfPlaneWidget_[3];
+	m_PlaneWidgetForArchCurve->GetNormal(normalOfPlaneWidget_);
+	double movedDistance = 50;
+	double translateDistance[3];
+	for (int i=0;i<3;i++)
+	{
+		translateDistance[i] = movedDistance*normalOfPlaneWidget_[i];
+	}
+	auto upTransform = vtkSmartPointer<vtkTransform>::New();
+	upTransform->Translate(translateDistance);
+	upTransform->Update();
+	auto upTransformFilter = vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+	upTransformFilter->SetInputData(m_ContourOffSetSplineFilter->GetOutput());
+	upTransformFilter->SetTransform(upTransform);
+	upTransformFilter->Update();
+	auto upPoints = vtkSmartPointer<vtkPoints>::New();
+	upPoints = upTransformFilter->GetOutput()->GetPoints();
+
+	auto downTransform = vtkSmartPointer<vtkTransform>::New();
+	downTransform->Translate(-translateDistance[0], -translateDistance[1], -translateDistance[2]);
+	downTransform->Update();
+	auto downTransformFilter = vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+	downTransformFilter->SetInputData(m_ContourOffSetSplineFilter->GetOutput());
+	downTransformFilter->SetTransform(downTransform);
+	downTransformFilter->Update();
+
+	auto downPoints = vtkSmartPointer<vtkPoints>::New();
+	downPoints = downTransformFilter->GetOutput()->GetPoints();
+
+	auto ruledSurfaceData = vtkSmartPointer<vtkPolyData>::New();
+	this->GenerateRuledSurface(downPoints,upPoints , ruledSurfaceData);
+
+	auto ruledSurfaceFilter = vtkSmartPointer<vtkRuledSurfaceFilter>::New();
+	ruledSurfaceFilter->SetInputData(ruledSurfaceData);
+	ruledSurfaceFilter->SetResolution(1, 400);
+	ruledSurfaceFilter->SetRuledModeToResample();
+	ruledSurfaceFilter->Update();
+
+	m_PanaromicProbeFilterInModel->SetInputData(ruledSurfaceFilter->GetOutput());
+	m_PanaromicProbeFilterInModel->SetSourceData(m_ImageData);
+	m_PanaromicProbeFilterInModel->Update();
+
+	auto windowLevel = vtkSmartPointer<vtkWindowLevelLookupTable>::New();
+	windowLevel->SetRampToLinear();
+
+	windowLevel->SetNumberOfColors(1000);
+	//windowLevel->SetWindow(5000);
+	//windowLevel->SetLevel(200);	
+	windowLevel->SetTableRange(-1024, 3096);
+	windowLevel->Build();
+	auto panaromicMapperInModel = vtkSmartPointer<vtkPolyDataMapper>::New();
+	panaromicMapperInModel->SetInputData(m_PanaromicProbeFilterInModel->GetPolyDataOutput());
+	panaromicMapperInModel->SetLookupTable(windowLevel);
+	panaromicMapperInModel->SetColorModeToMapScalars();
+	panaromicMapperInModel->UseLookupTableScalarRangeOn();
+
+	m_PanaromicActorInModel->SetMapper(panaromicMapperInModel);
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_PanaromicActorInModel))
+	{
+		m_ModelRenderer->AddActor(m_PanaromicActorInModel);
+	}
+	m_ModelRendWin->Render();
+
+}
+
+
+
+void DentalHelper::GenerateRuledSurface(vtkPoints* point1, vtkPoints* point2,vtkPolyData* output)
+{
+	auto points =vtkSmartPointer<vtkPoints>::New();
+	points->Initialize();
+
+	int numOflines = point1->GetNumberOfPoints();
+	for (int i = 0; i < numOflines / 2.0 - 0.5; i++)
+	{
+		points->InsertNextPoint(point1->GetPoint(2 * i));
+		points->InsertNextPoint(point1->GetPoint(2 * i + 1));
+		points->InsertNextPoint(point2->GetPoint(2 * i));
+		points->InsertNextPoint(point2->GetPoint(2 * i + 1));
+	}
+
+	if (numOflines % 2 == 1)
+	{
+		points->InsertNextPoint(point1->GetPoint(numOflines - 1));
+		points->InsertNextPoint(point2->GetPoint(numOflines - 1));
+	}
+
+	auto lines =vtkSmartPointer<vtkCellArray>::New();
+	int prePoint1 = 0;
+	int prePoint2 = 0;
+	for (int i = 0; i < numOflines - 1; i++)
+	{
+		auto line1 =vtkSmartPointer<vtkLine>::New();
+		if (i == 0)
+		{
+			line1->GetPointIds()->SetId(0, 2 * i);
+			line1->GetPointIds()->SetId(1, 2 * i + 1);
+			prePoint1 = 2 * i + 1;
+		}
+		else {
+			line1->GetPointIds()->SetId(0, prePoint1);
+			if (i % 2 == 1)
+			{
+				line1->GetPointIds()->SetId(1, prePoint1 + 3);
+				prePoint1 = prePoint1 + 3;
+			}
+			else
+			{
+				line1->GetPointIds()->SetId(1, prePoint1 + 1);
+				prePoint1 = prePoint1 + 1;
+			}
+		}
+		lines->InsertNextCell(line1);
+
+		auto line2 =vtkSmartPointer<vtkLine>::New();
+		if (i == 0)
+		{
+			line2->GetPointIds()->SetId(0, 2 * i + 2);
+			line2->GetPointIds()->SetId(1, 2 * i + 3);
+			prePoint2 = 2 * i + 3;
+		}
+		else
+		{
+			line2->GetPointIds()->SetId(0, prePoint2);
+			if (numOflines % 2 == 1 && i == numOflines - 2)
+			{
+				line2->GetPointIds()->SetId(1, prePoint2 + 2);
+			}
+			else if (i % 2 == 1)
+			{
+				line2->GetPointIds()->SetId(1, prePoint2 + 3);
+				prePoint2 = prePoint2 + 3;
+			}
+			else
+			{
+				line2->GetPointIds()->SetId(1, prePoint2 + 1);
+				prePoint2 = prePoint2 + 1;
+			}
+
+		}
+		lines->InsertNextCell(line2);
+
+	}		
+	auto polydata =vtkSmartPointer<vtkPolyData>::New();
+	polydata->SetPoints(points);
+	polydata->SetLines(lines);
+	output->DeepCopy(polydata);
+}
 
 void DentalHelper::GetRandomColor(double* rgb, int differ)
 {
@@ -554,7 +856,17 @@ void DentalHelper::OnContourWidgetForArchCurveInteraction()
 		widgetPoints.setValue(nameOfPoint + nameOfIndex.setNum(i) + "y", temp[1]);
 		widgetPoints.setValue(nameOfPoint + nameOfIndex.setNum(i) + "z", temp[2]);
 	}
-
+	//更新曲线插值
+	m_ContourSplineFilter->SetInputData(m_ContourRepForArchCurve->GetContourRepresentationAsPolyData());
+	m_ContourSplineFilter->Update();
+	//更新slider的最大值
+	ui.LowerRightSlider->setMaximum(m_ContourSplineFilter->GetOutput()->GetNumberOfPoints() - 2);
+	ui.LowerRightSpinBox->setMaximum(m_ContourSplineFilter->GetOutput()->GetNumberOfPoints() - 2);
+	//更新cross slice
+	this->GenerateCrossReslice();
+	//更新offset spline
+	this->GenerateOffSetSpline();
+	this->GeneratePanaromicReslice();
 }
 
 
@@ -620,6 +932,10 @@ void DentalHelper::OnPlaneWidgetForArchCurveInteraction()
 
 	this->UpDateCamera(m_UpRightRenderer, planeForArchCurve->GetNormal(), 90);
 	m_UpRightRendWin->Render();
+
+	this->GenerateCrossReslice();
+	this->GenerateOffSetSpline();
+	this->GeneratePanaromicReslice();
 }
 
 
@@ -756,7 +1072,7 @@ void DentalHelper::OnSetProgressBar(int p)
 void DentalHelper::OnUpDateLowerLeftView(int index)
 {
 	//如果是传统视图
-	if (m_ViewState == ViewState::conventional)
+	if (isCoronal)
 	{
 		//判断视图中是否存在图像
 		if (m_LowerLeftRenderer->GetViewProps()->IsItemPresent(m_CoronalViewer->GetImageActor()))
@@ -767,13 +1083,18 @@ void DentalHelper::OnUpDateLowerLeftView(int index)
 			m_LowerLeftRendWin->Render();
 		}
 	}
+	else
+	{
+		this->GenerateOffSetSpline();
+		this->GeneratePanaromicReslice();
+	}
 }
 
 
 void DentalHelper::OnUpDateLowerRightView(int index)
 {
 	//如果是传统视图
-	if (m_ViewState == ViewState::conventional)
+	if (isSagital)
 	{
 		//判断视图中是否存在图像
 		if (m_LowerRightRenderer->GetViewProps()->IsItemPresent(m_SagitalViewer->GetImageActor()))
@@ -783,6 +1104,10 @@ void DentalHelper::OnUpDateLowerRightView(int index)
 			this->UpDateSagitalLine();
 			m_LowerRightRendWin->Render();
 		}
+	}
+	else
+	{
+		this->GenerateCrossReslice();
 	}
 }
 
@@ -1291,14 +1616,40 @@ void DentalHelper::SetViewModel2Preplan()
 	m_UpRightRenderer->ResetCamera();
 	m_UpRightRendWin->Render();
 	m_EventQtConnector->Connect(m_ContourWidgetForArchCurve, vtkCommand::InteractionEvent, this, SLOT(OnContourWidgetForArchCurveInteraction()));
+	//样条曲线
+	auto cardinalSpline = vtkSmartPointer<vtkCardinalSpline>::New();
+	cardinalSpline->SetLeftConstraint(2);
+	cardinalSpline->SetRightConstraint(2);
+	cardinalSpline->SetLeftValue(0);
+	cardinalSpline->SetRightValue(0);
+	//插值样条曲线
+	m_ContourSplineFilter->SetSpline(cardinalSpline);
+	m_ContourSplineFilter->SetInputData(m_ContourRepForArchCurve->GetContourRepresentationAsPolyData());
+	m_ContourSplineFilter->SetSubdivideToLength();
+	m_ContourSplineFilter->SetLength(0.5);
+	m_ContourSplineFilter->Update();
+	ui.LowerRightSlider->setMaximum(m_ContourSplineFilter->GetOutput()->GetNumberOfPoints() - 2);
+	ui.LowerRightSpinBox->setMaximum(m_ContourSplineFilter->GetOutput()->GetNumberOfPoints() - 2);
+	//隐藏右下角视图,sagital的actor
+	this->SetActorsVisibilityInSagital(false);
+	this->SetWindowText(m_LowerRightRenderer, "Cross View", SagitalColor);	
+	//生成cross reslice
+	this->GenerateCrossReslice();
+	//设置panaromic slider的值和范围
+	ui.LowerLeftSlider->setMinimum(-100);
+	ui.LowerLeftSpinBox->setMinimum(-100);
+	ui.LowerLeftSlider->setMaximum(100);
+	ui.LowerLeftSpinBox->setMaximum(100);
+	ui.LowerLeftSlider->setValue(0);
+	ui.LowerLeftSpinBox->setValue(0);
 
 	//隐藏左下角视图，coronal的actor
 	this->SetActorsVisibilityInCoronal(false);
 	this->SetWindowText(m_LowerLeftRenderer, "Panaromic View", CoronalColor);
 	//显示全镜面
-
-	this->SetActorsVisibilityInSagital(false);
-
+	/*更新offset spline的位置*/
+	this->GenerateOffSetSpline();
+	this->GeneratePanaromicReslice();
 
 }
 
