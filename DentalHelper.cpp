@@ -81,11 +81,13 @@ DentalHelper::DentalHelper(QWidget *parent)
 	m_ContourOffSetSplineFilter = vtkSmartPointer<vtkSplineFilter>::New();
 	m_ContourOffSetActor = vtkSmartPointer<vtkActor>::New();
 
+	m_ContourOffSetSplineFilter2D = vtkSmartPointer<vtkSplineFilter>::New();
+
 	m_CrossPlane = vtkSmartPointer<vtkPlane>::New();
 
 	m_PanaromicProbeFilterInModel = vtkSmartPointer<vtkProbeFilter>::New();
 	m_PanaromicActorInModel = vtkSmartPointer<vtkActor>::New();
-
+	m_PanaromicActorIn2D = vtkSmartPointer<vtkActor>::New();
 	m_EventQtConnector = vtkSmartPointer<vtkEventQtSlotConnect>::New();
 
 
@@ -403,6 +405,9 @@ void DentalHelper::GenerateContourWidgetPolydata()
 		cellArrary->Initialize();
 		auto idlist = vtkSmartPointer<vtkIdList>::New();
 		idlist->Initialize();
+		double sumx = 0;
+		double sumy = 0;
+		double sumz = 0;
 		for (int i = 0; i < numOfPoints; i++)
 		{
 			double temp[3];
@@ -413,10 +418,28 @@ void DentalHelper::GenerateContourWidgetPolydata()
 			temp[2] = widgetPoints.value(nameOfPoint + nameOfIndex.setNum(i) + "z").toDouble();
 			points->InsertNextPoint(temp);
 			idlist->InsertNextId(i);
+			sumx = sumx + temp[0]; sumy = sumy + temp[1]; sumz = sumz+ temp[2];
 		}
 		cellArrary->InsertNextCell(idlist);
-		m_ContourInitialData->SetPoints(points);
-		m_ContourInitialData->SetLines(cellArrary);
+		auto formerData = vtkSmartPointer<vtkPolyData>::New();
+		formerData->SetPoints(points);
+		formerData->SetLines(cellArrary);
+		double centerOfPoints[3];
+		centerOfPoints[0] = sumx / numOfPoints; centerOfPoints[1]= sumy / numOfPoints;  centerOfPoints[2] = sumz/ numOfPoints;
+		double translateDistance[3];
+		for (int i=0;i<3;i++)
+		{
+			translateDistance[i] =m_PlaneWidgetForArchCurve->GetCenter()[i] - centerOfPoints[i];
+		}
+		auto transform = vtkSmartPointer<vtkTransform>::New();
+		transform->Translate(translateDistance);
+		transform->Update();
+		auto transformFilter = vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+		transformFilter->SetTransform(transform);
+		transformFilter->SetInputData(formerData);
+		transformFilter->Update();
+		m_ContourInitialData = transformFilter->GetOutput();
+
 	}
 	else
 	{
@@ -635,7 +658,6 @@ void DentalHelper::GeneratePanaromicReslice()
 
 	auto windowLevel = vtkSmartPointer<vtkWindowLevelLookupTable>::New();
 	windowLevel->SetRampToLinear();
-
 	windowLevel->SetNumberOfColors(1000);
 	//windowLevel->SetWindow(5000);
 	//windowLevel->SetLevel(200);	
@@ -654,6 +676,103 @@ void DentalHelper::GeneratePanaromicReslice()
 	}
 	m_ModelRendWin->Render();
 
+	
+
+
+}
+
+void DentalHelper::GeneratePanaromicReslice2D()
+{
+	//获得spline的长度
+	auto points = vtkSmartPointer<vtkPoints>::New();
+	points = m_ContourOffSetSplineFilter->GetOutput()->GetPoints();
+	int num = points->GetNumberOfPoints();
+	double distanceOfSpline = 0;
+	for (int i = 0; i < num - 1; i++)
+	{
+		double temp[3];
+		double temp1[3];
+		points->GetPoint(i, temp);
+		points->GetPoint(i + 1, temp1);
+		distanceOfSpline = distanceOfSpline + sqrt(vtkMath::Distance2BetweenPoints(temp, temp1));
+	}
+
+	double startPoint_[3] = { 0,0,0 };
+	double endPoint_[3] = { distanceOfSpline,0,0 };
+	auto lineSource = vtkSmartPointer<vtkLineSource>::New();
+	lineSource->SetPoint1(startPoint_);
+	lineSource->SetPoint2(endPoint_);
+	lineSource->Update();
+
+	auto cardinalSpline = vtkSmartPointer<vtkCardinalSpline>::New();
+	cardinalSpline->SetLeftConstraint(2);
+	cardinalSpline->SetRightConstraint(2);
+	cardinalSpline->SetLeftValue(0);
+	cardinalSpline->SetRightValue(0);
+
+	m_ContourOffSetSplineFilter2D->SetSpline(cardinalSpline);
+	m_ContourOffSetSplineFilter2D->SetInputData(lineSource->GetOutput());
+	m_ContourOffSetSplineFilter2D->SetSubdivideToSpecified();
+	m_ContourOffSetSplineFilter2D->SetNumberOfSubdivisions(m_ContourOffSetSplineFilter->GetNumberOfSubdivisions());
+	m_ContourOffSetSplineFilter2D->Update();
+
+	auto upTransform = vtkSmartPointer<vtkTransform>::New();
+	upTransform->Translate(0, 0, 50);
+	upTransform->Update();
+	auto upTransformFilter = vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+	upTransformFilter->SetInputData(m_ContourOffSetSplineFilter2D->GetOutput());
+	upTransformFilter->SetTransform(upTransform);
+	upTransformFilter->Update();
+
+	auto ruledPoints1 = vtkSmartPointer<vtkPoints>::New();
+	ruledPoints1 = upTransformFilter->GetOutput()->GetPoints();
+
+	auto downTranform = vtkSmartPointer<vtkTransform>::New();
+	downTranform->Translate(0, 0, -50);
+	downTranform->Update();
+
+	auto downTransformFilter = vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+	downTransformFilter->SetInputData(m_ContourOffSetSplineFilter2D->GetOutput());
+	downTransformFilter->SetTransform(downTranform);
+	downTransformFilter->Update();
+
+	auto ruledPoints2 = vtkSmartPointer<vtkPoints>::New();
+	ruledPoints2 = downTransformFilter->GetOutput()->GetPoints();
+
+	auto ruledSourceData = vtkSmartPointer<vtkPolyData>::New();
+	this->GenerateRuledSurface(ruledPoints1, ruledPoints2, ruledSourceData);
+
+	auto ruledSurfaceFilter = vtkSmartPointer<vtkRuledSurfaceFilter>::New();
+	ruledSurfaceFilter->SetInputData(ruledSourceData);
+	ruledSurfaceFilter->SetResolution(1, 400);
+	ruledSurfaceFilter->SetRuledModeToResample();
+	ruledSurfaceFilter->Update();
+
+	auto panaromicData = vtkSmartPointer<vtkPolyData>::New();
+	panaromicData = ruledSurfaceFilter->GetOutput();
+	panaromicData->GetPointData()->SetScalars(m_PanaromicProbeFilterInModel->GetOutput()->GetPointData()->GetScalars());
+
+	auto windowLevel = vtkSmartPointer<vtkWindowLevelLookupTable>::New();
+	//windowLevel->SetWindow(ui.WindowSlider->value());
+	//windowLevel->SetLevel(ui.LevelSlider->value());
+	windowLevel->SetRampToLinear();
+	windowLevel->SetNumberOfColors(100);
+	windowLevel->SetTableRange(-1024, 3096);
+	windowLevel->Build();
+
+	auto panaromicMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	panaromicMapper->SetInputData(panaromicData);
+	panaromicMapper->SetColorModeToMapScalars();
+	panaromicMapper->SetLookupTable(windowLevel);
+	panaromicMapper->UseLookupTableScalarRangeOn();
+
+	m_PanaromicActorIn2D->SetMapper(panaromicMapper);
+	if (!m_LowerLeftRenderer->GetActors()->IsItemPresent(m_PanaromicActorIn2D))
+	{
+		m_LowerLeftRenderer->AddActor(m_PanaromicActorIn2D);
+	}
+	double cameraNormal[3] = { 0,-1,0 };
+	this->UpDateCamera(m_LowerLeftRenderer, cameraNormal, -90);
 }
 
 
@@ -867,6 +986,7 @@ void DentalHelper::OnContourWidgetForArchCurveInteraction()
 	//更新offset spline
 	this->GenerateOffSetSpline();
 	this->GeneratePanaromicReslice();
+	this->GeneratePanaromicReslice2D();
 }
 
 
@@ -936,6 +1056,7 @@ void DentalHelper::OnPlaneWidgetForArchCurveInteraction()
 	this->GenerateCrossReslice();
 	this->GenerateOffSetSpline();
 	this->GeneratePanaromicReslice();
+	this->GeneratePanaromicReslice2D();
 }
 
 
@@ -1087,6 +1208,7 @@ void DentalHelper::OnUpDateLowerLeftView(int index)
 	{
 		this->GenerateOffSetSpline();
 		this->GeneratePanaromicReslice();
+		this->GeneratePanaromicReslice2D();
 	}
 }
 
@@ -1650,7 +1772,9 @@ void DentalHelper::SetViewModel2Preplan()
 	/*更新offset spline的位置*/
 	this->GenerateOffSetSpline();
 	this->GeneratePanaromicReslice();
-
+	this->GeneratePanaromicReslice2D();
+	m_LowerLeftRenderer->ResetCamera();
+	m_LowerLeftRendWin->Render();
 }
 
 void DentalHelper::SetVolumeRendering()

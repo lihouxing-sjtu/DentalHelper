@@ -131,11 +131,16 @@ private:
 	//偏移的曲线及actor
 	vtkSmartPointer<vtkSplineFilter> m_ContourOffSetSplineFilter;
 	vtkSmartPointer<vtkActor> m_ContourOffSetActor;
+	vtkSmartPointer<vtkSplineFilter> m_ContourOffSetSplineFilter2D;
+
 	//cross plane
 	vtkSmartPointer<vtkPlane> m_CrossPlane;
 	//panaromic in model
 	vtkSmartPointer<vtkProbeFilter> m_PanaromicProbeFilterInModel;
 	vtkSmartPointer<vtkActor> m_PanaromicActorInModel;
+
+	//panaromic in 2D
+	vtkSmartPointer<vtkActor> m_PanaromicActorIn2D;
 
 	//读取DICOM
 	void ReadImageFile(QString dir);
@@ -189,6 +194,10 @@ private:
 	void GeneratePanaromicReslice();
 	//生成直纹面
 	void GenerateRuledSurface(vtkPoints* p1, vtkPoints* p2,vtkPolyData*);
+	
+	//生成二维panaromic slice
+	void GeneratePanaromicReslice2D();
+
 protected slots:
 
 	//对Load Button的响应函数
