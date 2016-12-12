@@ -87,7 +87,26 @@ DentalHelper::DentalHelper(QWidget *parent)
 
 	m_PanaromicProbeFilterInModel = vtkSmartPointer<vtkProbeFilter>::New();
 	m_PanaromicActorInModel = vtkSmartPointer<vtkActor>::New();
+	m_PanaromicActorForDrawingNurve = vtkSmartPointer<vtkActor>::New();
 	m_PanaromicActorIn2D = vtkSmartPointer<vtkActor>::New();
+
+
+	m_ContourForLeftNurve = vtkSmartPointer<vtkContourWidget>::New();
+	m_ContourLineForLeftNurve = vtkSmartPointer<vtkBezierContourLineInterpolator>::New();
+	m_ContourPointPlacerForLeftNurve = vtkSmartPointer<vtkPolygonalSurfacePointPlacer>::New();
+	m_ContourRepForLeftNurve = vtkSmartPointer<vtkOrientedGlyphContourRepresentation>::New();
+	m_TubeForLeftNurve = vtkSmartPointer<vtkTubeFilter>::New();
+	m_ActorForLeftNurve = vtkSmartPointer<vtkActor>::New();
+
+
+	m_ContourForRightNurve = vtkSmartPointer<vtkContourWidget>::New();
+	m_ContourLineForRightNurve = vtkSmartPointer<vtkBezierContourLineInterpolator>::New();
+	m_ContourPointPlacerForRightNurve = vtkSmartPointer<vtkPolygonalSurfacePointPlacer>::New();
+	m_ContourRepForRightNurve = vtkSmartPointer<vtkOrientedGlyphContourRepresentation>::New();
+	m_TubeForRightNurve = vtkSmartPointer<vtkTubeFilter>::New();
+	m_ActorForRightNurve = vtkSmartPointer<vtkActor>::New();
+
+
 	m_EventQtConnector = vtkSmartPointer<vtkEventQtSlotConnect>::New();
 
 
@@ -113,7 +132,16 @@ DentalHelper::DentalHelper(QWidget *parent)
 	connect(ui.BackGround2Button, SIGNAL(clicked()), this, SLOT(OnSetBackGroundColor2()));
 
 	connect(ui.ImageNextButton, SIGNAL(clicked()), this, SLOT(OnPreplanSetting()));
-
+	connect(ui.PlaneWidgetVisibilityButton, SIGNAL(clicked()), this, SLOT(OnPlaneWidgetForArchCurveVisibility()));
+	connect(ui.PanaromicInModelVisivilityButton, SIGNAL(clicked()), this, SLOT(OnPanaromicInModelVisibility()));
+	connect(ui.CrossViewVisibilityButton, SIGNAL(clicked()), this, SLOT(OnCrossViewInModelVisibility()));
+	connect(ui.DeleteLastContourNodeButton, SIGNAL(clicked()), this, SLOT(OnDeleteLastContourNode()));
+	connect(ui.Panaromic2DRadioButton, SIGNAL(clicked()), this, SLOT(OnChangePanaromicInteractionStyle()));
+	connect(ui.Panaromic3DRadioButton, SIGNAL(clicked()), this, SLOT(OnChangePanaromicInteractionStyle()));
+	connect(ui.DrawLeftNurveButton, SIGNAL(clicked()), this, SLOT(OnDrawLeftNurve()));
+	connect(ui.DeleteLastLeftNurvePointButton, SIGNAL(clicked()), this, SLOT(OnDeleteLastNodeForLeftNurve()));
+	connect(ui.DrawRightNurveButton, SIGNAL(clicked()), this, SLOT(OnDrawRightNurve()));
+	connect(ui.DeleteLastRightNurvePointButton, SIGNAL(clicked()), this, SLOT(OnDeleteLastNodeForRightNurve()));
 }
 
 DentalHelper::~DentalHelper()
@@ -390,6 +418,7 @@ void DentalHelper::DrawSagitalLine()
 	m_LowerLeftRenderer->AddActor(m_Sagital_CoronalLineActor);
 	m_LowerLeftRenderer->ResetCamera();
 	m_LowerLeftRendWin->Render();
+	
 }
 void DentalHelper::GenerateContourWidgetPolydata()
 {
@@ -644,7 +673,7 @@ void DentalHelper::GeneratePanaromicReslice()
 	downPoints = downTransformFilter->GetOutput()->GetPoints();
 
 	auto ruledSurfaceData = vtkSmartPointer<vtkPolyData>::New();
-	this->GenerateRuledSurface(downPoints,upPoints , ruledSurfaceData);
+	this->GenerateRuledSurface(upPoints,downPoints , ruledSurfaceData);
 
 	auto ruledSurfaceFilter = vtkSmartPointer<vtkRuledSurfaceFilter>::New();
 	ruledSurfaceFilter->SetInputData(ruledSurfaceData);
@@ -674,6 +703,20 @@ void DentalHelper::GeneratePanaromicReslice()
 	{
 		m_ModelRenderer->AddActor(m_PanaromicActorInModel);
 	}
+	m_PanaromicActorForDrawingNurve->SetMapper(panaromicMapperInModel);
+	if (!m_LowerLeftRenderer->GetActors()->IsItemPresent(m_PanaromicActorForDrawingNurve))
+	{
+		m_LowerLeftRenderer->AddActor(m_PanaromicActorForDrawingNurve);
+	}
+	if (ui.Panaromic2DRadioButton->isChecked())
+	{
+		m_PanaromicActorForDrawingNurve->VisibilityOff();
+	}
+	else
+	{
+		m_PanaromicActorForDrawingNurve->VisibilityOn();
+	}
+	m_LowerLeftRendWin->Render();
 	m_ModelRendWin->Render();
 
 	
@@ -771,8 +814,12 @@ void DentalHelper::GeneratePanaromicReslice2D()
 	{
 		m_LowerLeftRenderer->AddActor(m_PanaromicActorIn2D);
 	}
-	double cameraNormal[3] = { 0,-1,0 };
-	this->UpDateCamera(m_LowerLeftRenderer, cameraNormal, -90);
+	double cameraNormal[3] = { 0,1,0 };
+	if (ui.Panaromic2DRadioButton->isChecked())
+	{	
+		this->UpDateCamera(m_LowerLeftRenderer, cameraNormal, 90);
+	}
+
 }
 
 
@@ -945,7 +992,7 @@ void DentalHelper::InitializeView()
 	m_LowerLeftRendWin = vtkSmartPointer<vtkRenderWindow>::New();
 	m_LowerLeftInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
 	m_LowerLeftInterStyle = vtkSmartPointer<vtkInteractorStyleImage>::New();
-
+	m_LowerLeftModelStyle = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
 	m_LowerLeftRendWin->AddRenderer(m_LowerLeftRenderer);
 	m_LowerLeftInteractor->SetRenderWindow(m_LowerLeftRendWin);
 	m_LowerLeftInteractor->SetInteractorStyle(m_LowerLeftInterStyle);
@@ -954,6 +1001,37 @@ void DentalHelper::InitializeView()
 	m_LowerLeftInteractor->Initialize();
 	this->SetWindowText(m_LowerLeftRenderer, "Coronal View", CoronalColor);
 }
+void DentalHelper::OnChangePanaromicInteractionStyle()
+{
+	if (ui.Panaromic2DRadioButton->isChecked())
+	{
+		m_LowerLeftInteractor->SetInteractorStyle(m_LowerLeftInterStyle);
+		m_PanaromicActorIn2D->VisibilityOn();
+		m_PanaromicActorForDrawingNurve->VisibilityOff();
+		double normalOfCamera[3] = { 0,1,0 };
+		m_LowerLeftRenderer->ResetCamera();
+		this->UpDateCamera(m_LowerLeftRenderer, normalOfCamera,90);
+	}
+	else
+	{
+		m_LowerLeftInteractor->SetInteractorStyle(m_LowerLeftModelStyle);
+		m_PanaromicActorIn2D->VisibilityOff();
+		m_PanaromicActorForDrawingNurve->VisibilityOn();
+		m_LowerLeftRenderer->ResetCamera();
+	}
+	m_LowerLeftRendWin->Render();
+}
+void DentalHelper::OnContourForLeftCurveInterAction()
+{
+	m_ModelRendWin->Render();
+}
+
+void DentalHelper::OnContourForRightCurveInterAction()
+{
+	m_ModelRendWin->Render();
+}
+
+
 
 void DentalHelper::OnContourWidgetForArchCurveInteraction()
 {
@@ -987,6 +1065,320 @@ void DentalHelper::OnContourWidgetForArchCurveInteraction()
 	this->GenerateOffSetSpline();
 	this->GeneratePanaromicReslice();
 	this->GeneratePanaromicReslice2D();
+}
+
+void DentalHelper::OnCrossViewInModelVisibility()
+{
+	//如果没有生成，则返回
+	if (!m_ModelRenderer->GetViewProps()->IsItemPresent(m_ReslicePropOfCrossInModel))
+	{
+		return;
+	}
+	if (m_ReslicePropOfCrossInModel->GetVisibility())
+	{
+		m_ReslicePropOfCrossInModel->VisibilityOff();
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/visibility_off_64.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.CrossViewVisibilityButton->setIcon(icon);
+	}
+	else
+	{
+		m_ReslicePropOfCrossInModel->VisibilityOn();
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/visibility_on_64.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.CrossViewVisibilityButton->setIcon(icon);
+	}
+	m_ModelRendWin->Render();
+}
+void DentalHelper::OnDeleteLastNodeForLeftNurve()
+{
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForLeftNurve))
+	{
+		return;
+	}
+	if (!ui.DrawLeftNurveButton->isChecked())
+	{
+		return;
+	}
+	m_ContourRepForLeftNurve->DeleteLastNode();
+	m_ModelRendWin->Render();
+	m_LowerLeftRendWin->Render();
+}
+void DentalHelper::OnDeleteLastNodeForRightNurve()
+{
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForRightNurve))
+	{
+		return;
+	}
+	if (!ui.DrawRightNurveButton->isChecked())
+	{
+		return;
+	}
+	m_ContourRepForRightNurve->DeleteLastNode();
+	m_ModelRendWin->Render();
+	m_LowerLeftRendWin->Render();
+}
+
+
+
+void DentalHelper::OnDrawLeftNurve()
+{
+	if (!m_LowerLeftRenderer->GetActors()->IsItemPresent(m_PanaromicActorForDrawingNurve))
+	{
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/Draw.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.DrawLeftNurveButton->setIcon(icon);
+		ui.DrawLeftNurveButton->setChecked(false);
+		return;
+	}
+	if (!m_PanaromicActorForDrawingNurve->GetVisibility())
+	{
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/Draw.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.DrawLeftNurveButton->setIcon(icon);
+		ui.DrawLeftNurveButton->setChecked(false);
+		return;
+	}
+	if (!ui.DrawLeftNurveButton->isChecked())
+	{
+		ui.DrawRightNurveButton->setDisabled(false);
+		ui.DeleteLastRightNurvePointButton->setDisabled(false);
+
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/Draw.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.DrawLeftNurveButton->setIcon(icon);
+		ui.LowerLeftQvtkWidget->setCursor(Qt::ArrowCursor);
+		m_ContourForLeftNurve->Off();
+		m_LowerLeftRendWin->Render();
+		return;
+	}
+
+
+	if (m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForLeftNurve))
+	{
+		QIcon msgicon;
+		msgicon.addFile(QStringLiteral(":/DentalHelper/Resources/DentalHelper.ico"), QSize(), QIcon::Normal, QIcon::Off);
+		QMessageBox choose;
+		choose.setText("Do you want to change the left nurve?");
+		choose.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+		choose.setButtonText(2048, "Redraw");
+		choose.setButtonText(8388608, "Modify");
+		choose.setWindowIcon(msgicon);
+		QString msgStyle = "font: 90 9pt \"Microsoft YaHei\";";
+
+		QList<QAbstractButton*> msgButtons = choose.buttons();
+		for each (QAbstractButton* var in msgButtons)
+		{
+			var->setStyleSheet("border:2px solid gray;border-radius:10px;padding:2px 4px;"+msgStyle);
+		}
+		int choice = choose.exec();
+
+		if (choice ==QMessageBox::Discard)//如果是修改
+		{
+
+			m_ContourForLeftNurve->On();
+			m_ContourForLeftNurve->SetWidgetState(vtkContourWidget::Define);
+
+			QIcon icon;
+			icon.addFile(QStringLiteral(":/DentalHelper/Resources/Draw_Checked.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ui.DrawLeftNurveButton->setIcon(icon);
+			//画右边神经的按钮禁用
+			ui.DrawRightNurveButton->setDisabled(true);
+			ui.DeleteLastRightNurvePointButton->setDisabled(true);
+			ui.LowerLeftQvtkWidget->setCursor(Qt::PointingHandCursor);
+			return;
+		}
+		else if (choice==QMessageBox::Save)//如果是重画
+		{
+			QIcon icon;
+			icon.addFile(QStringLiteral(":/DentalHelper/Resources/Draw_Checked.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ui.DrawLeftNurveButton->setIcon(icon);
+
+			m_ContourRepForLeftNurve->ClearAllNodes();
+			m_ContourForLeftNurve->SetWidgetState(vtkContourWidget::Define);
+			ui.LowerLeftQvtkWidget->setCursor(Qt::PointingHandCursor);
+		}
+		else
+		{
+			QIcon icon;
+			icon.addFile(QStringLiteral(":/DentalHelper/Resources/Draw.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ui.DrawLeftNurveButton->setIcon(icon);
+			ui.DrawLeftNurveButton->setChecked(false);
+			return;
+		}
+		m_LowerLeftRendWin->Render();
+	}
+	QIcon icon;
+	icon.addFile(QStringLiteral(":/DentalHelper/Resources/Draw_Checked.png"), QSize(), QIcon::Normal, QIcon::Off);
+	ui.DrawLeftNurveButton->setIcon(icon);
+	//画右边神经的按钮禁用
+	ui.DrawRightNurveButton->setDisabled(true);
+	ui.DeleteLastRightNurvePointButton->setDisabled(true);
+
+	m_ContourForLeftNurve->SetInteractor(m_LowerLeftInteractor);
+	m_ContourForLeftNurve->SetFollowCursor(0);
+
+	m_ContourLineForLeftNurve->SetMaximumCurveLineSegments(200);
+	m_ContourPointPlacerForLeftNurve->AddProp(m_PanaromicActorForDrawingNurve);
+
+	m_ContourForLeftNurve->SetRepresentation(m_ContourRepForLeftNurve);
+	m_ContourRepForLeftNurve->SetLineInterpolator(m_ContourLineForLeftNurve);
+	m_ContourRepForLeftNurve->SetPointPlacer(m_ContourPointPlacerForLeftNurve);
+
+	m_ContourRepForLeftNurve->GetLinesProperty()->SetLineWidth(3);
+	m_ContourRepForLeftNurve->GetLinesProperty()->SetColor(0.7, 0.1, 0.3);
+	
+
+	m_ContourForLeftNurve->On();
+	m_EventQtConnector->Connect(m_ContourForLeftNurve, vtkCommand::InteractionEvent, this, SLOT(OnContourForLeftCurveInterAction()));
+
+	ui.LowerLeftQvtkWidget->setCursor(Qt::PointingHandCursor);
+
+	m_TubeForLeftNurve->SetCapping(1);
+	m_TubeForLeftNurve->SetRadius(2);
+	m_TubeForLeftNurve->SetNumberOfSides(20);
+	m_TubeForLeftNurve->SetInputData(m_ContourRepForLeftNurve->GetContourRepresentationAsPolyData());
+	m_TubeForLeftNurve->Update();
+
+	auto leftNurveMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	leftNurveMapper->SetInputConnection(m_TubeForLeftNurve->GetOutputPort());
+	m_ActorForLeftNurve->SetMapper(leftNurveMapper);
+
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForLeftNurve))
+	{
+		m_ModelRenderer->AddActor(m_ActorForLeftNurve);
+	}
+	m_ModelRendWin->Render();
+}
+
+void DentalHelper::OnDrawRightNurve()
+{
+	if (!m_LowerLeftRenderer->GetActors()->IsItemPresent(m_PanaromicActorForDrawingNurve))
+	{
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/Draw.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.DrawRightNurveButton->setIcon(icon);
+		ui.DrawRightNurveButton->setChecked(false);
+		return;
+	}
+	if (!m_PanaromicActorForDrawingNurve->GetVisibility())
+	{
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/Draw.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.DrawRightNurveButton->setIcon(icon);
+		ui.DrawRightNurveButton->setChecked(false);
+		return;
+	}
+	if (!ui.DrawRightNurveButton->isChecked())
+	{
+		ui.DrawLeftNurveButton->setDisabled(false);
+		ui.DeleteLastLeftNurvePointButton->setDisabled(false);
+
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/Draw.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.DrawRightNurveButton->setIcon(icon);
+		ui.LowerLeftQvtkWidget->setCursor(Qt::ArrowCursor);
+		m_ContourForRightNurve->Off();
+		m_LowerLeftRendWin->Render();
+		return;
+	}
+
+
+	if (m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForRightNurve))
+	{
+		QIcon msgicon;
+		msgicon.addFile(QStringLiteral(":/DentalHelper/Resources/DentalHelper.ico"), QSize(), QIcon::Normal, QIcon::Off);
+		QMessageBox choose;
+		choose.setText("Do you want to change the left nurve?");
+		choose.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+		choose.setButtonText(2048, "Redraw");
+		choose.setButtonText(8388608, "Modify");
+		choose.setWindowIcon(msgicon);
+		QString msgStyle = "font: 90 9pt \"Microsoft YaHei\";";
+
+		QList<QAbstractButton*> msgButtons = choose.buttons();
+		for each (QAbstractButton* var in msgButtons)
+		{
+			var->setStyleSheet("border:2px solid gray;border-radius:10px;padding:2px 4px;" + msgStyle);
+		}
+		int choice = choose.exec();
+
+		if (choice == QMessageBox::Discard)//如果是修改
+		{
+
+			m_ContourForRightNurve->On();
+			m_ContourForRightNurve->SetWidgetState(vtkContourWidget::Define);
+
+			QIcon icon;
+			icon.addFile(QStringLiteral(":/DentalHelper/Resources/Draw_Checked.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ui.DrawRightNurveButton->setIcon(icon);
+			//画左边神经的按钮禁用
+			ui.DrawLeftNurveButton->setDisabled(true);
+			ui.DeleteLastLeftNurvePointButton->setDisabled(true);
+			ui.LowerLeftQvtkWidget->setCursor(Qt::PointingHandCursor);
+			return;
+		}
+		else if (choice == QMessageBox::Save)//如果是重画
+		{
+			QIcon icon;
+			icon.addFile(QStringLiteral(":/DentalHelper/Resources/Draw_Checked.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ui.DrawRightNurveButton->setIcon(icon);
+
+			m_ContourRepForRightNurve->ClearAllNodes();
+			m_ContourForRightNurve->SetWidgetState(vtkContourWidget::Define);
+			ui.LowerLeftQvtkWidget->setCursor(Qt::PointingHandCursor);
+		}
+		else
+		{
+			QIcon icon;
+			icon.addFile(QStringLiteral(":/DentalHelper/Resources/Draw.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ui.DrawRightNurveButton->setIcon(icon);
+			ui.DrawRightNurveButton->setChecked(false);
+			return;
+		}
+		m_LowerLeftRendWin->Render();
+	}
+	QIcon icon;
+	icon.addFile(QStringLiteral(":/DentalHelper/Resources/Draw_Checked.png"), QSize(), QIcon::Normal, QIcon::Off);
+	ui.DrawRightNurveButton->setIcon(icon);
+	//画左边神经的按钮禁用
+	ui.DrawLeftNurveButton->setDisabled(true);
+	ui.DeleteLastLeftNurvePointButton->setDisabled(true);
+
+	m_ContourForRightNurve->SetInteractor(m_LowerLeftInteractor);
+	m_ContourForRightNurve->SetFollowCursor(0);
+
+	m_ContourLineForRightNurve->SetMaximumCurveLineSegments(200);
+	m_ContourPointPlacerForRightNurve->AddProp(m_PanaromicActorForDrawingNurve);
+
+	m_ContourForRightNurve->SetRepresentation(m_ContourRepForRightNurve);
+	m_ContourRepForRightNurve->SetLineInterpolator(m_ContourLineForRightNurve);
+	m_ContourRepForRightNurve->SetPointPlacer(m_ContourPointPlacerForRightNurve);
+
+	m_ContourRepForRightNurve->GetLinesProperty()->SetLineWidth(3);
+	m_ContourRepForRightNurve->GetLinesProperty()->SetColor(0.7, 0.1, 0.3);
+
+
+	m_ContourForRightNurve->On();
+	m_EventQtConnector->Connect(m_ContourForRightNurve, vtkCommand::InteractionEvent, this, SLOT(OnContourForRightCurveInterAction()));
+
+	ui.LowerLeftQvtkWidget->setCursor(Qt::PointingHandCursor);
+
+	m_TubeForRightNurve->SetCapping(1);
+	m_TubeForRightNurve->SetRadius(2);
+	m_TubeForRightNurve->SetNumberOfSides(20);
+	m_TubeForRightNurve->SetInputData(m_ContourRepForRightNurve->GetContourRepresentationAsPolyData());
+	m_TubeForRightNurve->Update();
+
+	auto rightNurveMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	rightNurveMapper->SetInputConnection(m_TubeForRightNurve->GetOutputPort());
+	m_ActorForRightNurve->SetMapper(rightNurveMapper);
+
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForRightNurve))
+	{
+		m_ModelRenderer->AddActor(m_ActorForRightNurve);
+	}
+	m_ModelRendWin->Render();
 }
 
 
@@ -1042,6 +1434,29 @@ void DentalHelper::OnLowerRightViewButton()
 	}
 	this->SetSuitableLayout();
 }
+void DentalHelper::OnPanaromicInModelVisibility()
+{
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_PanaromicActorInModel))
+	{
+		return;//如果没有全景片，返回
+	}
+	if (m_PanaromicActorInModel->GetVisibility())//如果可见，则设置为不可见
+	{
+		m_PanaromicActorInModel->VisibilityOff();
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/visibility_off_64.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.PanaromicInModelVisivilityButton->setIcon(icon);
+	}
+	else
+	{
+		m_PanaromicActorInModel->VisibilityOn();
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/visibility_on_64.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.PanaromicInModelVisivilityButton->setIcon(icon);
+	}
+	m_ModelRendWin->Render();
+}
+
 
 void DentalHelper::OnPlaneWidgetForArchCurveInteraction()
 {
@@ -1058,6 +1473,29 @@ void DentalHelper::OnPlaneWidgetForArchCurveInteraction()
 	this->GeneratePanaromicReslice();
 	this->GeneratePanaromicReslice2D();
 }
+void DentalHelper::OnPlaneWidgetForArchCurveVisibility()
+{
+	if (!m_UpRightRenderer->GetViewProps()->IsItemPresent(m_ReslicePropForArchCurve))
+	{
+		return;
+	}
+	if (m_PlaneWidgetForArchCurve->GetEnabled())//如果可见，设置为不可见
+	{
+		m_PlaneWidgetForArchCurve->Off();
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/visibility_off_64.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.PlaneWidgetVisibilityButton->setIcon(icon);
+	}
+	else
+	{
+		m_PlaneWidgetForArchCurve->On();
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/visibility_on_64.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.PlaneWidgetVisibilityButton->setIcon(icon);
+	}
+	m_ModelRendWin->Render();
+}
+
 
 
 void DentalHelper::OnPreplanSetting()
@@ -1130,6 +1568,19 @@ void DentalHelper::OnRemoveImage()
 }
 
 
+
+void DentalHelper::OnDeleteLastContourNode()
+{
+	if (m_ContourRepForArchCurve->GetNumberOfNodes()<3)
+	{
+		return;
+	}
+	m_ContourRepForArchCurve->DeleteLastNode();
+	m_ContourRepForArchCurve->BuildRepresentation();
+	this->OnContourWidgetForArchCurveInteraction();
+	m_UpRightRendWin->Render();
+
+}
 
 
 void DentalHelper::OnSetBackGroundColor1()
@@ -1364,7 +1815,7 @@ void DentalHelper::ReadImageFile(QString dir)
 		ui.ImageTabelWidget->setRowCount(numOfItem - 1);
 		ui.ImageTabelWidget->insertRow(numOfItem - 1);
 
-		foreach(QString text, item->GetMainList())
+		for each(QString text in item->GetMainList())
 		{
 			int indexOfItem = item->GetMainList().indexOf(text);
 			QTableWidgetItem *itemText = new QTableWidgetItem(text);

@@ -64,7 +64,7 @@ private:
 	vtkSmartPointer<vtkRenderWindow> m_LowerLeftRendWin;
 	vtkSmartPointer<vtkRenderWindowInteractor> m_LowerLeftInteractor;
 	vtkSmartPointer<vtkInteractorStyleImage> m_LowerLeftInterStyle;
-
+	vtkSmartPointer<vtkInteractorStyleTrackballCamera> m_LowerLeftModelStyle;
 	//当前处理的image data
 	vtkSmartPointer<vtkImageData> m_ImageData;
 	double m_Spacing[3],  m_Origin[3];
@@ -85,7 +85,7 @@ private:
 	vtkSmartPointer<vtkLine> m_Coronal_AxialLine;
 	vtkSmartPointer<vtkPolyData> m_Coronal_AxialLinePolyData;
 	vtkSmartPointer<vtkActor> m_Coronal_AxialLineActor;
-
+	
 	vtkSmartPointer<vtkLine> m_Coronal_SagitalLine;
 	vtkSmartPointer<vtkPolyData> m_Coronal_SagitalLinePolyData;
 	vtkSmartPointer<vtkActor> m_Coronal_SagitalLineActor;
@@ -141,6 +141,25 @@ private:
 
 	//panaromic in 2D
 	vtkSmartPointer<vtkActor> m_PanaromicActorIn2D;
+	vtkSmartPointer<vtkActor> m_PanaromicActorForDrawingNurve;
+
+
+	//画左边神经
+	vtkSmartPointer<vtkContourWidget> m_ContourForLeftNurve;
+	vtkSmartPointer<vtkBezierContourLineInterpolator> m_ContourLineForLeftNurve;
+	vtkSmartPointer<vtkPolygonalSurfacePointPlacer> m_ContourPointPlacerForLeftNurve;
+	vtkSmartPointer<vtkOrientedGlyphContourRepresentation> m_ContourRepForLeftNurve;
+	vtkSmartPointer<vtkTubeFilter> m_TubeForLeftNurve;
+	vtkSmartPointer<vtkActor> m_ActorForLeftNurve;
+
+
+	//画右边神经
+	vtkSmartPointer<vtkContourWidget> m_ContourForRightNurve;
+	vtkSmartPointer<vtkBezierContourLineInterpolator> m_ContourLineForRightNurve;
+	vtkSmartPointer<vtkPolygonalSurfacePointPlacer> m_ContourPointPlacerForRightNurve;
+	vtkSmartPointer<vtkOrientedGlyphContourRepresentation> m_ContourRepForRightNurve;
+	vtkSmartPointer<vtkTubeFilter> m_TubeForRightNurve;
+	vtkSmartPointer<vtkActor> m_ActorForRightNurve;
 
 	//读取DICOM
 	void ReadImageFile(QString dir);
@@ -235,5 +254,26 @@ protected slots:
 	void OnPlaneWidgetForArchCurveInteraction();
 	//牙弓曲线contour widget交互响应函数
 	void OnContourWidgetForArchCurveInteraction();
-
+	//plane widget的可见性
+	void OnPlaneWidgetForArchCurveVisibility();
+	//panaromic in model的可见性
+	void OnPanaromicInModelVisibility();
+	//cross view in model的可见性
+	void OnCrossViewInModelVisibility();
+	//初始化contour widget，如果对自动记录上一次的点不满意
+	void OnDeleteLastContourNode();
+	//切换交互方式
+	void OnChangePanaromicInteractionStyle();
+	//画左边神经
+	void OnDrawLeftNurve();
+	//左边神经contour的交互
+	void OnContourForLeftCurveInterAction();
+	//画左边神经时撤销最后一个选择的点
+	void OnDeleteLastNodeForLeftNurve();
+	//画右边神经
+	void OnDrawRightNurve();
+	//右边神经contour的交互
+	void OnContourForRightCurveInterAction();
+	//画右边神经时撤销最后一个选择的点
+	void OnDeleteLastNodeForRightNurve();
 };
