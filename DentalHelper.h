@@ -162,8 +162,16 @@ private:
 	vtkSmartPointer<vtkActor> m_ActorForRightNurve;
 	//切割左边神经
 	vtkSmartPointer<vtkActor> m_CutActorForLeftNurveInCross;
+	vtkSmartPointer<vtkActor> m_CutActorForLeftNurveInAxial;
+
 	//切割右边神经
 	vtkSmartPointer<vtkActor> m_CutActorForRightNurveInCross;
+	vtkSmartPointer<vtkActor> m_CutActorForRightNurveInAxial;
+
+	//切换axial和arch curve的action
+	QMenu* m_MenuForUpRight;
+	QAction* m_Change2ArchCurve;
+	QAction* m_Change2Axial;
 
 	//读取DICOM
 	void ReadImageFile(QString dir);
@@ -224,6 +232,10 @@ private:
 	void CutLeftNurveInCrossView();
 	//在cross view中切割right nurve
 	void CurRightNurveInCrossView();
+	//在axial view中切割left nurve
+	void CutLeftNurveInAxialView();
+	//在axial view中切割right nurve
+	void CutRightNurveInAxialView();
 
 protected slots:
 
@@ -284,5 +296,8 @@ protected slots:
 	void OnContourForRightCurveInterAction();
 	//画右边神经时撤销最后一个选择的点
 	void OnDeleteLastNodeForRightNurve();
-	
+	//up right切换到axial view
+	void OnChange2AxialView();
+	//up right切换到arch curve
+	void OnChange2ArchCurve();
 };

@@ -108,9 +108,25 @@ DentalHelper::DentalHelper(QWidget *parent)
 
 
 	m_CutActorForLeftNurveInCross = vtkSmartPointer<vtkActor>::New();
+	m_CutActorForLeftNurveInAxial = vtkSmartPointer<vtkActor>::New();
 
+	m_CutActorForRightNurveInCross = vtkSmartPointer<vtkActor>::New();
+	m_CutActorForRightNurveInAxial = vtkSmartPointer<vtkActor>::New();
 
 	m_EventQtConnector = vtkSmartPointer<vtkEventQtSlotConnect>::New();
+
+
+	
+	m_Change2ArchCurve = new QAction("Arch Curve", this);
+	m_Change2ArchCurve->setCheckable(true);
+	m_Change2Axial = new QAction("Axial", this);
+	m_Change2Axial->setCheckable(true);
+	m_MenuForUpRight = new QMenu(this);
+	m_MenuForUpRight->addAction(m_Change2ArchCurve);
+	m_MenuForUpRight->addAction(m_Change2Axial);
+	ui.ChangeUpRightViewButton->setMenu(m_MenuForUpRight);
+
+
 
 
 	connect(ui.LoadDicomButton, SIGNAL(clicked()), this, SLOT(OnReadDICOM()));
@@ -145,12 +161,53 @@ DentalHelper::DentalHelper(QWidget *parent)
 	connect(ui.DeleteLastLeftNurvePointButton, SIGNAL(clicked()), this, SLOT(OnDeleteLastNodeForLeftNurve()));
 	connect(ui.DrawRightNurveButton, SIGNAL(clicked()), this, SLOT(OnDrawRightNurve()));
 	connect(ui.DeleteLastRightNurvePointButton, SIGNAL(clicked()), this, SLOT(OnDeleteLastNodeForRightNurve()));
+
+	connect(m_Change2Axial, SIGNAL(triggered()), this, SLOT(OnChange2AxialView()));
+	connect(m_Change2ArchCurve, SIGNAL(triggered()), this, SLOT(OnChange2ArchCurve()));
+
 }
 
 DentalHelper::~DentalHelper()
 {
 	delete m_ProgressDialog;
 }
+void DentalHelper::CutLeftNurveInAxialView()
+{
+	//如果没有画左边神经，则返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForLeftNurve))
+	{
+		return;
+	}
+	
+	double normalOfCut[3] = { 0,0,1 };
+	double centerOfCut[3];
+	centerOfCut[0] = m_Origin[0] + m_SagitalViewer->GetSlice()*m_Spacing[0];
+	centerOfCut[1] = m_Origin[1] + m_CoronalViewer->GetSlice()*m_Spacing[1];
+	centerOfCut[2] = m_Origin[2] + m_AxialViewer->GetSlice()*m_Spacing[2];
+	auto planeOfCut = vtkSmartPointer<vtkPlane>::New();
+	planeOfCut->SetOrigin(centerOfCut);
+	planeOfCut->SetNormal(normalOfCut);
+
+	auto cutter = vtkSmartPointer<vtkCutter>::New();
+	cutter->SetInputData(m_TubeForLeftNurve->GetOutput());
+	cutter->SetCutFunction(planeOfCut);
+	cutter->Update();
+
+	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputData(cutter->GetOutput());
+
+	m_CutActorForLeftNurveInAxial->SetMapper(mapper);
+	m_CutActorForLeftNurveInAxial->GetProperty()->SetColor(1, 0, 0);
+	m_CutActorForLeftNurveInAxial->GetProperty()->SetAmbient(1);
+	m_CutActorForLeftNurveInAxial->GetProperty()->SetDiffuse(0);
+	m_CutActorForLeftNurveInAxial->GetProperty()->SetSpecular(1);
+	if (!m_UpRightRenderer->GetActors()->IsItemPresent(m_CutActorForLeftNurveInAxial))
+	{
+		m_UpRightRenderer->AddActor(m_CutActorForLeftNurveInAxial);
+	}
+	m_UpRightRendWin->Render();
+}
+
 
 void DentalHelper::CutLeftNurveInCrossView()
 {
@@ -179,6 +236,43 @@ void DentalHelper::CutLeftNurveInCrossView()
 	}
 	m_LowerRightRendWin->Render();
 }
+void DentalHelper::CutRightNurveInAxialView()
+{
+	//如果没有画右边神经则返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForRightNurve))
+	{
+		return;
+	}
+	double normalOfCut[3] = { 0,0,1 };
+	double centerOfCut[3];
+	centerOfCut[0] = m_Origin[0] + m_SagitalViewer->GetSlice()*m_Spacing[0];
+	centerOfCut[1] = m_Origin[1] + m_CoronalViewer->GetSlice()*m_Spacing[1];
+	centerOfCut[2] = m_Origin[2] + m_AxialViewer->GetSlice()*m_Spacing[2];
+	auto planeOfCut = vtkSmartPointer<vtkPlane>::New();
+	planeOfCut->SetOrigin(centerOfCut);
+	planeOfCut->SetNormal(normalOfCut);
+
+	auto cutter = vtkSmartPointer<vtkCutter>::New();
+	cutter->SetCutFunction(planeOfCut);
+	cutter->SetInputData(m_TubeForRightNurve->GetOutput());
+	cutter->Update();
+
+	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputData(cutter->GetOutput());
+
+	m_CutActorForRightNurveInAxial->SetMapper(mapper);
+	m_CutActorForRightNurveInAxial->GetProperty()->SetColor(1, 0, 0);
+	m_CutActorForRightNurveInAxial->GetProperty()->SetAmbient(1);
+	m_CutActorForRightNurveInAxial->GetProperty()->SetDiffuse(0);
+	m_CutActorForRightNurveInAxial->GetProperty()->SetSpecular(1);
+	if (!m_UpRightRenderer->GetActors()->IsItemPresent(m_CutActorForRightNurveInAxial))
+	{
+		m_UpRightRenderer->AddActor(m_CutActorForRightNurveInAxial);
+	}
+	m_UpRightRendWin->Render();
+
+}
+
 
 void DentalHelper::CurRightNurveInCrossView()
 {
@@ -1062,6 +1156,84 @@ void DentalHelper::InitializeView()
 	m_LowerLeftInteractor->Initialize();
 	this->SetWindowText(m_LowerLeftRenderer, "Coronal View", CoronalColor);
 }
+void DentalHelper::OnChange2ArchCurve()
+{
+	if (!m_UpRightRenderer->GetViewProps()->IsItemPresent(m_ReslicePropForArchCurve))
+	{
+		return;
+	}
+	ui.ChangeUpRightViewButton->setText("Arch Curve");
+	m_Change2ArchCurve->setChecked(true);
+	m_Change2Axial->setChecked(false);
+
+	//设置窗口标识
+	this->SetWindowText(m_UpRightRenderer, "Arch Curve", AxialColor);
+
+	//隐藏其他actor
+	if (m_UpRightRenderer->GetViewProps()->IsItemPresent(m_AxialViewer->GetImageActor()))
+	{
+		m_AxialViewer->GetImageActor()->VisibilityOff();
+		m_Sagital_AxialLineActor->VisibilityOff();
+		m_Coronal_AxialLineActor->VisibilityOff();
+
+		//隐藏神经轮廓
+		m_CutActorForLeftNurveInAxial->VisibilityOff();
+		m_CutActorForRightNurveInAxial->VisibilityOff();
+	}
+	isAxial = false;
+
+	//显示arch nurve
+	if (m_UpRightRenderer->GetViewProps()->IsItemPresent(m_ReslicePropForArchCurve))
+	{
+		m_ReslicePropForArchCurve->VisibilityOn();
+		m_ContourWidgetForArchCurve->On();
+		m_UpRightRenderer->ResetCamera();
+		this->UpDateCamera(m_UpRightRenderer, m_PlaneWidgetForArchCurve->GetNormal(), 90);
+	}
+}
+
+
+void DentalHelper::OnChange2AxialView()
+{
+
+	ui.ChangeUpRightViewButton->setText("Axial");
+	m_Change2Axial->setChecked(true);
+	m_Change2ArchCurve->setChecked(false);
+
+	//设置窗口标识
+	this->SetWindowText(m_UpRightRenderer, "Axial", AxialColor);
+
+	//重设slider 的范围
+	int axial_middle = (m_Extend[5] - m_Extend[4]) / 2;
+	ui.UpRightSlider->setMaximum(m_Extend[5] - m_Extend[4]);
+	ui.UpRightSpinBox->setMaximum(m_Extend[5] - m_Extend[4]);
+	ui.UpRightSlider->setValue(axial_middle);
+	//显示image 
+	m_AxialViewer->GetImageActor()->VisibilityOn();
+	m_Sagital_AxialLineActor->VisibilityOn();
+	m_Coronal_AxialLineActor->VisibilityOn();
+
+	//显示神经轮廓
+	m_CutActorForLeftNurveInAxial->VisibilityOn();
+	m_CutActorForRightNurveInAxial->VisibilityOn();
+	//隐藏其他的actor
+	if (m_UpRightRenderer->GetViewProps()->IsItemPresent(m_ReslicePropForArchCurve))
+	{
+		m_ReslicePropForArchCurve->VisibilityOff();
+		m_ContourWidgetForArchCurve->Off();
+		m_ContourOffSetActor->VisibilityOff();
+	}
+	m_AxialViewer->Render();
+	isAxial = true;
+
+	this->CutLeftNurveInAxialView();
+	this->CutRightNurveInAxialView();
+
+	double normalOfAxialCamera[3] = { 0,0,1 };
+	this->UpDateCamera(m_UpRightRenderer, normalOfAxialCamera, 0);
+}
+
+
 void DentalHelper::OnChangePanaromicInteractionStyle()
 {
 	if (ui.Panaromic2DRadioButton->isChecked())
@@ -1753,7 +1925,7 @@ void DentalHelper::OnUpDateUpRightView(int index)
 {
 
 	//如果是传统视图
-	if (m_ViewState==ViewState::conventional)
+	if (isAxial)
 	{
 		//判断视图中是否存在图像
 		if (m_UpRightRenderer->GetViewProps()->IsItemPresent(m_AxialViewer->GetImageActor()))
@@ -1761,6 +1933,8 @@ void DentalHelper::OnUpDateUpRightView(int index)
 			m_AxialViewer->SetSlice(index);
 			m_AxialViewer->Render();
 			this->UpDateAxialLine();
+			this->CutLeftNurveInAxialView();
+			this->CutRightNurveInAxialView();
 			m_UpRightRendWin->Render();
 		}
 	}
@@ -2149,7 +2323,9 @@ void DentalHelper::SetViewModel2Conventional()
 	ui.UpRightSpinBox->setMaximum(m_Extend[5] - m_Extend[4]);
 	ui.UpRightSlider->setValue(axial_middle);
 	this->SetSingleViewer(m_UpRightRenderer, m_AxialViewer, axial_middle, 0);
-
+	ui.ChangeUpRightViewButton->setText("Axial");
+	m_Change2ArchCurve->setChecked(false);
+	m_Change2Axial->setChecked(true);
 	
 
 	//设置coronal视图
@@ -2175,6 +2351,9 @@ void DentalHelper::SetViewModel2Conventional()
 void DentalHelper::SetViewModel2Preplan()
 {
 	
+	ui.ChangeUpRightViewButton->setText("Arch Curve");
+	m_Change2ArchCurve->setChecked(true);
+	m_Change2Axial->setChecked(false);
 
 	//设定planewidget的point1和point2
 	double point1ForPlaneWidget[3], point2ForPlaneWidget[3], boundsOfProp[6];
@@ -2449,37 +2628,44 @@ void DentalHelper::UpDateCamera(vtkRenderer* ren, double* referenceNormal, doubl
 
 void DentalHelper::UpDateCoronalLine()
 {
-	double Coronal_AxialPoint1[3];
-	double Coronal_AxialPoint2[3];
+	if (isAxial)
+	{
+		double Coronal_AxialPoint1[3];
+		double Coronal_AxialPoint2[3];
 
-	Coronal_AxialPoint1[0] = m_Spacing[0] * m_Extend[0] + m_Origin[0];
-	Coronal_AxialPoint1[1] = m_Spacing[1] * ui.LowerLeftSlider->value() + m_Origin[1];
-	Coronal_AxialPoint1[2] = m_Spacing[2] * (m_Extend[5] + 1) + m_Origin[2];
+		Coronal_AxialPoint1[0] = m_Spacing[0] * m_Extend[0] + m_Origin[0];
+		Coronal_AxialPoint1[1] = m_Spacing[1] * ui.LowerLeftSlider->value() + m_Origin[1];
+		Coronal_AxialPoint1[2] = m_Spacing[2] * (m_Extend[5] + 1) + m_Origin[2];
 
-	Coronal_AxialPoint2[0] = m_Spacing[0] * m_Extend[1] + m_Origin[0];
-	Coronal_AxialPoint2[1] = m_Spacing[1] * ui.LowerLeftSlider->value() + m_Origin[1];
-	Coronal_AxialPoint2[2] = m_Spacing[2] * (m_Extend[5] + 1) + m_Origin[2];
+		Coronal_AxialPoint2[0] = m_Spacing[0] * m_Extend[1] + m_Origin[0];
+		Coronal_AxialPoint2[1] = m_Spacing[1] * ui.LowerLeftSlider->value() + m_Origin[1];
+		Coronal_AxialPoint2[2] = m_Spacing[2] * (m_Extend[5] + 1) + m_Origin[2];
 
-	m_Coronal_AxialLine->GetPoints()->Initialize();
-	m_Coronal_AxialLine->GetPoints()->InsertNextPoint(Coronal_AxialPoint1);
-	m_Coronal_AxialLine->GetPoints()->InsertNextPoint(Coronal_AxialPoint2);
-	m_UpRightRendWin->Render();
+		m_Coronal_AxialLine->GetPoints()->Initialize();
+		m_Coronal_AxialLine->GetPoints()->InsertNextPoint(Coronal_AxialPoint1);
+		m_Coronal_AxialLine->GetPoints()->InsertNextPoint(Coronal_AxialPoint2);
+		m_UpRightRendWin->Render();
+	}
+
+	if (isSagital)
+	{
+		double Coronal_SagitalPoint1[3];
+		double Coronal_SagitalPoint2[3];
+
+		Coronal_SagitalPoint1[0] = m_Spacing[0] * (m_Extend[1] + 1) + m_Origin[0];
+		Coronal_SagitalPoint1[1] = m_Spacing[1] * ui.LowerLeftSlider->value() + m_Origin[1];
+		Coronal_SagitalPoint1[2] = m_Spacing[2] * m_Extend[4] + m_Origin[2];
+
+		Coronal_SagitalPoint2[0] = m_Spacing[0] * (m_Extend[1] + 1) + m_Origin[0];
+		Coronal_SagitalPoint2[1] = m_Spacing[1] * ui.LowerLeftSlider->value() + m_Origin[1];
+		Coronal_SagitalPoint2[2] = m_Spacing[2] * m_Extend[5] + m_Origin[2];
+
+		m_Coronal_SagitalLine->GetPoints()->Initialize();
+		m_Coronal_SagitalLine->GetPoints()->InsertNextPoint(Coronal_SagitalPoint1);
+		m_Coronal_SagitalLine->GetPoints()->InsertNextPoint(Coronal_SagitalPoint2);
+	}
 
 
-	double Coronal_SagitalPoint1[3];
-	double Coronal_SagitalPoint2[3];
-
-	Coronal_SagitalPoint1[0] = m_Spacing[0] * (m_Extend[1] + 1) + m_Origin[0];
-	Coronal_SagitalPoint1[1] = m_Spacing[1] * ui.LowerLeftSlider->value() + m_Origin[1];
-	Coronal_SagitalPoint1[2] = m_Spacing[2] * m_Extend[4] + m_Origin[2];
-
-	Coronal_SagitalPoint2[0] = m_Spacing[0] * (m_Extend[1] + 1) + m_Origin[0];
-	Coronal_SagitalPoint2[1] = m_Spacing[1] * ui.LowerLeftSlider->value() + m_Origin[1];
-	Coronal_SagitalPoint2[2] = m_Spacing[2] * m_Extend[5] + m_Origin[2];
-
-	m_Coronal_SagitalLine->GetPoints()->Initialize();
-	m_Coronal_SagitalLine->GetPoints()->InsertNextPoint(Coronal_SagitalPoint1);
-	m_Coronal_SagitalLine->GetPoints()->InsertNextPoint(Coronal_SagitalPoint2);
 
 	m_LowerRightRendWin->Render();
 }
