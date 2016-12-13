@@ -107,6 +107,9 @@ DentalHelper::DentalHelper(QWidget *parent)
 	m_ActorForRightNurve = vtkSmartPointer<vtkActor>::New();
 
 
+	m_CutActorForLeftNurveInCross = vtkSmartPointer<vtkActor>::New();
+
+
 	m_EventQtConnector = vtkSmartPointer<vtkEventQtSlotConnect>::New();
 
 
@@ -148,6 +151,62 @@ DentalHelper::~DentalHelper()
 {
 	delete m_ProgressDialog;
 }
+
+void DentalHelper::CutLeftNurveInCrossView()
+{
+	//如果没有画左边神经，则返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForLeftNurve))
+	{
+		return;
+	}
+	auto cutter = vtkSmartPointer<vtkCutter>::New();
+	cutter->SetInputData(m_TubeForLeftNurve->GetOutput());
+	cutter->SetCutFunction(m_CrossPlane);
+	cutter->Update();
+
+	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputData(cutter->GetOutput());
+
+	m_CutActorForLeftNurveInCross->SetMapper(mapper);
+	m_CutActorForLeftNurveInCross->GetProperty()->SetColor(1, 0, 0);
+	m_CutActorForLeftNurveInCross->GetProperty()->SetAmbient(1);
+	m_CutActorForLeftNurveInCross->GetProperty()->SetSpecular(0);
+	m_CutActorForLeftNurveInCross->GetProperty()->SetDiffuse(1);
+	//如果是第一次切割，添加actor
+	if (!m_LowerRightRenderer->GetActors()->IsItemPresent(m_CutActorForLeftNurveInCross))
+	{
+		m_LowerRightRenderer->AddActor(m_CutActorForLeftNurveInCross);
+	}
+	m_LowerRightRendWin->Render();
+}
+
+void DentalHelper::CurRightNurveInCrossView()
+{
+	//如果没有画右边神经则返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForRightNurve))
+	{
+		return;
+	}
+	auto cutter = vtkSmartPointer<vtkCutter>::New();
+	cutter->SetCutFunction(m_CrossPlane);
+	cutter->SetInputData(m_TubeForRightNurve->GetOutput());
+	cutter->Update();
+
+	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputData(cutter->GetOutput());
+
+	m_CutActorForRightNurveInCross->SetMapper(mapper);
+	m_CutActorForRightNurveInCross->GetProperty()->SetColor(1, 0, 0);
+	m_CutActorForRightNurveInCross->GetProperty()->SetAmbient(1);
+	m_CutActorForRightNurveInCross->GetProperty()->SetSpecular(0);
+	m_CutActorForRightNurveInCross->GetProperty()->SetDiffuse(1);
+	if (!m_LowerRightRenderer->GetActors()->IsItemPresent(m_CutActorForRightNurveInCross))
+	{
+		m_LowerRightRenderer->AddActor(m_CutActorForRightNurveInCross);
+	}
+	m_LowerRightRendWin->Render();
+}
+
 
 void DentalHelper::DrawAxialLine()
 {
@@ -560,6 +619,8 @@ void DentalHelper::GenerateCrossReslice()
 	this->UpDateCamera(m_LowerRightRenderer, normalOfCrossPlane_, 90);
 	m_LowerRightRendWin->Render();
 
+	this->CutLeftNurveInCrossView();//切割左边神经
+	this->CurRightNurveInCrossView();//切割右边神经
 
 }
 
@@ -1023,11 +1084,13 @@ void DentalHelper::OnChangePanaromicInteractionStyle()
 }
 void DentalHelper::OnContourForLeftCurveInterAction()
 {
+	this->CutLeftNurveInCrossView();
 	m_ModelRendWin->Render();
 }
 
 void DentalHelper::OnContourForRightCurveInterAction()
 {
+	this->CurRightNurveInCrossView();
 	m_ModelRendWin->Render();
 }
 
@@ -1243,7 +1306,7 @@ void DentalHelper::OnDrawLeftNurve()
 	auto leftNurveMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	leftNurveMapper->SetInputConnection(m_TubeForLeftNurve->GetOutputPort());
 	m_ActorForLeftNurve->SetMapper(leftNurveMapper);
-
+	m_ActorForLeftNurve->GetProperty()->SetColor(1, 0, 0);
 	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForLeftNurve))
 	{
 		m_ModelRenderer->AddActor(m_ActorForLeftNurve);
@@ -1373,7 +1436,7 @@ void DentalHelper::OnDrawRightNurve()
 	auto rightNurveMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	rightNurveMapper->SetInputConnection(m_TubeForRightNurve->GetOutputPort());
 	m_ActorForRightNurve->SetMapper(rightNurveMapper);
-
+	m_ActorForRightNurve->GetProperty()->SetColor(1, 0, 0);
 	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForRightNurve))
 	{
 		m_ModelRenderer->AddActor(m_ActorForRightNurve);

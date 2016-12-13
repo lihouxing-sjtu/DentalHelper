@@ -160,6 +160,10 @@ private:
 	vtkSmartPointer<vtkOrientedGlyphContourRepresentation> m_ContourRepForRightNurve;
 	vtkSmartPointer<vtkTubeFilter> m_TubeForRightNurve;
 	vtkSmartPointer<vtkActor> m_ActorForRightNurve;
+	//切割左边神经
+	vtkSmartPointer<vtkActor> m_CutActorForLeftNurveInCross;
+	//切割右边神经
+	vtkSmartPointer<vtkActor> m_CutActorForRightNurveInCross;
 
 	//读取DICOM
 	void ReadImageFile(QString dir);
@@ -216,6 +220,10 @@ private:
 	
 	//生成二维panaromic slice
 	void GeneratePanaromicReslice2D();
+	//在cross view中切割left nurve
+	void CutLeftNurveInCrossView();
+	//在cross view中切割right nurve
+	void CurRightNurveInCrossView();
 
 protected slots:
 
@@ -276,4 +284,5 @@ protected slots:
 	void OnContourForRightCurveInterAction();
 	//画右边神经时撤销最后一个选择的点
 	void OnDeleteLastNodeForRightNurve();
+	
 };
