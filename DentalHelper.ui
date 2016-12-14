@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1145</width>
-    <height>891</height>
+    <width>1263</width>
+    <height>884</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,410 +19,21 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_8">
-    <item row="1" column="0">
-     <layout class="QGridLayout" name="ViewGridLayout">
-      <item row="0" column="0">
-       <widget class="QWidget" name="UpLeftLayout" native="true">
-        <layout class="QGridLayout" name="gridLayout_5">
-         <item row="0" column="0">
-          <layout class="QVBoxLayout" name="UpLeftLayout_2">
-           <item>
-            <widget class="QVTKWidget" name="ModelQvtkWidget">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_7">
-             <item>
-              <widget class="QSlider" name="ModelOpacitySlider">
-               <property name="styleSheet">
-                <string notr="true">QSlider::groove:horizontal {  
-border: 1px solid #4A708B;  
-background: #C0C0C0;  
-height: 5px;  
-border-radius: 1px;  
-padding-left:-1px;  
-padding-right:-1px;  
-}  
-
-QSlider::sub-page:horizontal {  
-background: qlineargradient(x1:0, y1:0, x2:0, y2:1,   
-stop:0 #B1B1B1, stop:1 #c4c4c4);  
-background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,  
-stop: 0 #5DCCFF, stop: 1 #1874CD);  
-border: 1px solid #4A708B;  
-height: 10px;  
-border-radius: 2px;  
-}  
-
-QSlider::add-page:horizontal {  
-background: #575757;  
-border: 0px solid #777;  
-height: 10px;  
-border-radius: 2px;  
-}  
- 
-QSlider::handle:horizontal   
-{  
-background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,   
-stop:0.6 #45ADED, stop:0.778409 rgba(255, 255, 255, 255));  
-
-width: 11px;  
-margin-top: -3px;  
- margin-bottom: -3px;  
-border-radius: 5px;  
-}  
-QSlider::handle:horizontal:hover {  
-background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0.6 #2A8BDA,   
-stop:0.778409 rgba(255, 255, 255, 255));  
-width: 11px;margin-top: -3px;margin-bottom: -3px;border-radius: 5px;}  
-
-QSlider::sub-page:horizontal:disabled { background: #00009C;  
-border-color: #999;}  
-QSlider::add-page:horizontal:disabled { background: #eee;  border-color: #999;}  
-
-QSlider::handle:horizontal:disabled {  
-background: #eee;  
-border: 1px solid #aaa;  
-border-radius: 4px;}  
-</string>
-               </property>
-               <property name="maximum">
-                <number>100</number>
-               </property>
-               <property name="value">
-                <number>100</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="ModelOpacitySpinBox">
-               <property name="font">
-                <font>
-                 <family>微软雅黑</family>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
-               <property name="maximum">
-                <number>100</number>
-               </property>
-               <property name="value">
-                <number>100</number>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="ModelColorButton">
-               <property name="styleSheet">
-                <string notr="true">background-color: rgb(255, 255, 0);
-QPushButton{border:2px solid gray;border-radius:10px;padding:2px 4px;}
-</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QWidget" name="UpRightLayout" native="true">
-        <layout class="QGridLayout" name="gridLayout_6">
-         <item row="0" column="0">
-          <layout class="QVBoxLayout" name="UpRightLayout_2">
-           <item>
-            <widget class="QVTKWidget" name="UpRightQvtkWidget">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_9">
-             <item>
-              <widget class="QSlider" name="UpRightSlider">
-               <property name="styleSheet">
-                <string notr="true">QSlider::groove:horizontal {  
-border: 1px solid #4A708B;  
-background: #C0C0C0;  
-height: 5px;  
-border-radius: 1px;  
-padding-left:-1px;  
-padding-right:-1px;  
-}  
-
-QSlider::sub-page:horizontal {  
-background: qlineargradient(x1:0, y1:0, x2:0, y2:1,   
-stop:0 #B1B1B1, stop:1 #c4c4c4);  
-background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,  
-stop: 0 #5DCCFF, stop: 1 #1874CD);  
-border: 1px solid #4A708B;  
-height: 10px;  
-border-radius: 2px;  
-}  
-
-QSlider::add-page:horizontal {  
-background: #575757;  
-border: 0px solid #777;  
-height: 10px;  
-border-radius: 2px;  
-}  
- 
-QSlider::handle:horizontal   
-{  
-background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,   
-stop:0.6 #45ADED, stop:0.778409 rgba(255, 255, 255, 255));  
-
-width: 11px;  
-margin-top: -3px;  
- margin-bottom: -3px;  
-border-radius: 5px;  
-}  
-QSlider::handle:horizontal:hover {  
-background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0.6 #2A8BDA,   
-stop:0.778409 rgba(255, 255, 255, 255));  
-width: 11px;margin-top: -3px;margin-bottom: -3px;border-radius: 5px;}  
-
-QSlider::sub-page:horizontal:disabled { background: #00009C;  
-border-color: #999;}  
-QSlider::add-page:horizontal:disabled { background: #eee;  border-color: #999;}  
-
-QSlider::handle:horizontal:disabled {  
-background: #eee;  
-border: 1px solid #aaa;  
-border-radius: 4px;}  
-</string>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="UpRightSpinBox">
-               <property name="font">
-                <font>
-                 <family>微软雅黑</family>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QWidget" name="LowerLeftLayout" native="true">
-        <layout class="QGridLayout" name="gridLayout_3">
-         <item row="0" column="0">
-          <layout class="QVBoxLayout" name="LowerLeftLayout_2">
-           <item>
-            <widget class="QVTKWidget" name="LowerLeftQvtkWidget">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_8">
-             <item>
-              <widget class="QSlider" name="LowerLeftSlider">
-               <property name="styleSheet">
-                <string notr="true">QSlider::groove:horizontal {  
-border: 1px solid #4A708B;  
-background: #C0C0C0;  
-height: 5px;  
-border-radius: 1px;  
-padding-left:-1px;  
-padding-right:-1px;  
-}  
-
-QSlider::sub-page:horizontal {  
-background: qlineargradient(x1:0, y1:0, x2:0, y2:1,   
-stop:0 #B1B1B1, stop:1 #c4c4c4);  
-background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,  
-stop: 0 #5DCCFF, stop: 1 #1874CD);  
-border: 1px solid #4A708B;  
-height: 10px;  
-border-radius: 2px;  
-}  
-
-QSlider::add-page:horizontal {  
-background: #575757;  
-border: 0px solid #777;  
-height: 10px;  
-border-radius: 2px;  
-}  
- 
-QSlider::handle:horizontal   
-{  
-background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,   
-stop:0.6 #45ADED, stop:0.778409 rgba(255, 255, 255, 255));  
-
-width: 11px;  
-margin-top: -3px;  
- margin-bottom: -3px;  
-border-radius: 5px;  
-}  
-QSlider::handle:horizontal:hover {  
-background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0.6 #2A8BDA,   
-stop:0.778409 rgba(255, 255, 255, 255));  
-width: 11px;margin-top: -3px;margin-bottom: -3px;border-radius: 5px;}  
-
-QSlider::sub-page:horizontal:disabled { background: #00009C;  
-border-color: #999;}  
-QSlider::add-page:horizontal:disabled { background: #eee;  border-color: #999;}  
-
-QSlider::handle:horizontal:disabled {  
-background: #eee;  
-border: 1px solid #aaa;  
-border-radius: 4px;}  
-</string>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="LowerLeftSpinBox">
-               <property name="font">
-                <font>
-                 <family>微软雅黑</family>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QWidget" name="LowerRightLayout" native="true">
-        <layout class="QGridLayout" name="gridLayout_4">
-         <item row="0" column="0">
-          <layout class="QVBoxLayout" name="LowerRightLayout_2">
-           <item>
-            <widget class="QVTKWidget" name="LowerRightQvtkWidget">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_10">
-             <item>
-              <widget class="QSlider" name="LowerRightSlider">
-               <property name="styleSheet">
-                <string notr="true">QSlider::groove:horizontal {  
-border: 1px solid #4A708B;  
-background: #C0C0C0;  
-height: 5px;  
-border-radius: 1px;  
-padding-left:-1px;  
-padding-right:-1px;  
-}  
-
-QSlider::sub-page:horizontal {  
-background: qlineargradient(x1:0, y1:0, x2:0, y2:1,   
-stop:0 #B1B1B1, stop:1 #c4c4c4);  
-background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,  
-stop: 0 #5DCCFF, stop: 1 #1874CD);  
-border: 1px solid #4A708B;  
-height: 10px;  
-border-radius: 2px;  
-}  
-
-QSlider::add-page:horizontal {  
-background: #575757;  
-border: 0px solid #777;  
-height: 10px;  
-border-radius: 2px;  
-}  
- 
-QSlider::handle:horizontal   
-{  
-background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,   
-stop:0.6 #45ADED, stop:0.778409 rgba(255, 255, 255, 255));  
-
-width: 11px;  
-margin-top: -3px;  
- margin-bottom: -3px;  
-border-radius: 5px;  
-}  
-QSlider::handle:horizontal:hover {  
-background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0.6 #2A8BDA,   
-stop:0.778409 rgba(255, 255, 255, 255));  
-width: 11px;margin-top: -3px;margin-bottom: -3px;border-radius: 5px;}  
-
-QSlider::sub-page:horizontal:disabled { background: #00009C;  
-border-color: #999;}  
-QSlider::add-page:horizontal:disabled { background: #eee;  border-color: #999;}  
-
-QSlider::handle:horizontal:disabled {  
-background: #eee;  
-border: 1px solid #aaa;  
-border-radius: 4px;}  
-</string>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="LowerRightSpinBox">
-               <property name="font">
-                <font>
-                 <family>微软雅黑</family>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
-      </item>
-     </layout>
-    </item>
+    <property name="leftMargin">
+     <number>1</number>
+    </property>
+    <property name="topMargin">
+     <number>1</number>
+    </property>
+    <property name="rightMargin">
+     <number>1</number>
+    </property>
+    <property name="bottomMargin">
+     <number>1</number>
+    </property>
+    <property name="spacing">
+     <number>1</number>
+    </property>
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="maximumSize">
@@ -439,7 +50,7 @@ border-radius: 4px;}
        </font>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>1</number>
       </property>
       <property name="iconSize">
        <size>
@@ -447,7 +58,7 @@ border-radius: 4px;}
         <height>48</height>
        </size>
       </property>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="imagesetting">
        <attribute name="icon">
         <iconset resource="DentalHelper.qrc">
          <normaloff>:/DentalHelper/Resources/DICOM.png</normaloff>:/DentalHelper/Resources/DICOM.png</iconset>
@@ -1052,7 +663,7 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_2">
+      <widget class="QWidget" name="preplanesetting">
        <attribute name="icon">
         <iconset resource="DentalHelper.qrc">
          <normaloff>:/DentalHelper/Resources/setting.png</normaloff>:/DentalHelper/Resources/setting.png</iconset>
@@ -1062,29 +673,29 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_14">
         <property name="leftMargin">
-         <number>1</number>
+         <number>0</number>
         </property>
         <property name="topMargin">
-         <number>1</number>
+         <number>0</number>
         </property>
         <property name="rightMargin">
-         <number>1</number>
+         <number>0</number>
         </property>
         <property name="bottomMargin">
-         <number>1</number>
+         <number>0</number>
         </property>
         <property name="spacing">
-         <number>1</number>
+         <number>0</number>
         </property>
         <item row="0" column="0">
-         <widget class="QGroupBox" name="groupBox">
+         <widget class="QGroupBox" name="setting">
           <property name="title">
            <string>Setting</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
           </property>
-          <layout class="QGridLayout" name="gridLayout_12">
+          <layout class="QGridLayout" name="gridLayout_13">
            <property name="leftMargin">
             <number>1</number>
            </property>
@@ -1288,14 +899,14 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QGroupBox" name="groupBox_2">
+         <widget class="QGroupBox" name="Nurve">
           <property name="title">
            <string>Nurve</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
           </property>
-          <layout class="QGridLayout" name="gridLayout_13">
+          <layout class="QGridLayout" name="gridLayout_12">
            <property name="leftMargin">
             <number>1</number>
            </property>
@@ -1390,8 +1001,8 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QToolButton" name="DeleteLastLeftNurvePointButton">
+           <item row="1" column="1">
+            <widget class="QToolButton" name="DeleteLastRightNurvePointButton">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                <horstretch>0</horstretch>
@@ -1426,8 +1037,8 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="1">
-            <widget class="QToolButton" name="DeleteLastRightNurvePointButton">
+           <item row="1" column="0">
+            <widget class="QToolButton" name="DeleteLastLeftNurvePointButton">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                <horstretch>0</horstretch>
@@ -1466,12 +1077,423 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
          </widget>
         </item>
         <item row="0" column="2">
+         <widget class="QGroupBox" name="ProthesisModel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Prothesis Model</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_17">
+           <property name="leftMargin">
+            <number>1</number>
+           </property>
+           <property name="topMargin">
+            <number>1</number>
+           </property>
+           <property name="rightMargin">
+            <number>1</number>
+           </property>
+           <property name="bottomMargin">
+            <number>1</number>
+           </property>
+           <property name="spacing">
+            <number>1</number>
+           </property>
+           <item row="0" column="0">
+            <layout class="QVBoxLayout" name="verticalLayout_6">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_13">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QToolButton" name="LoadUpProthesisButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>微软雅黑</family>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">border:2px solid gray;border-radius:10px;padding:2px 4px;</string>
+                 </property>
+                 <property name="text">
+                  <string>Load</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="DentalHelper.qrc">
+                   <normaloff>:/DentalHelper/Resources/folder open.png</normaloff>:/DentalHelper/Resources/folder open.png</iconset>
+                 </property>
+                 <property name="toolButtonStyle">
+                  <enum>Qt::ToolButtonTextBesideIcon</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QToolButton" name="UpProthesisVisibilityButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>微软雅黑</family>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">border:2px solid gray;border-radius:10px;padding:2px 4px;</string>
+                 </property>
+                 <property name="text">
+                  <string>Up Prothesis</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="DentalHelper.qrc">
+                   <normaloff>:/DentalHelper/Resources/visibility_on_64.png</normaloff>:/DentalHelper/Resources/visibility_on_64.png</iconset>
+                 </property>
+                 <property name="toolButtonStyle">
+                  <enum>Qt::ToolButtonTextBesideIcon</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QToolButton" name="DeleteUpProthesisButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>微软雅黑</family>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">border:2px solid gray;border-radius:10px;padding:2px 4px;</string>
+                 </property>
+                 <property name="text">
+                  <string>Delete</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="DentalHelper.qrc">
+                   <normaloff>:/DentalHelper/Resources/delete_hole.png</normaloff>:/DentalHelper/Resources/delete_hole.png</iconset>
+                 </property>
+                 <property name="toolButtonStyle">
+                  <enum>Qt::ToolButtonTextBesideIcon</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_14">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QSpinBox" name="UpProthesisOpacitySpinBox">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>100</number>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="UpProthesisOpacitySlider">
+                 <property name="styleSheet">
+                  <string notr="true">QSlider::groove:horizontal {  
+border: 1px solid #4A708B;  
+background: #C0C0C0;  
+height: 5px;  
+border-radius: 1px;  
+padding-left:-1px;  
+padding-right:-1px;  
+}  
+
+QSlider::sub-page:horizontal {  
+background: qlineargradient(x1:0, y1:0, x2:0, y2:1,   
+stop:0 #B1B1B1, stop:1 #c4c4c4);  
+background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,  
+stop: 0 #5DCCFF, stop: 1 #1874CD);  
+border: 1px solid #4A708B;  
+height: 10px;  
+border-radius: 2px;  
+}  
+
+QSlider::add-page:horizontal {  
+background: #575757;  
+border: 0px solid #777;  
+height: 10px;  
+border-radius: 2px;  
+}  
+ 
+QSlider::handle:horizontal   
+{  
+background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,   
+stop:0.6 #45ADED, stop:0.778409 rgba(255, 255, 255, 255));  
+
+width: 11px;  
+margin-top: -3px;  
+ margin-bottom: -3px;  
+border-radius: 5px;  
+}  
+QSlider::handle:horizontal:hover {  
+background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0.6 #2A8BDA,   
+stop:0.778409 rgba(255, 255, 255, 255));  
+width: 11px;margin-top: -3px;margin-bottom: -3px;border-radius: 5px;}  
+
+QSlider::sub-page:horizontal:disabled { background: #00009C;  
+border-color: #999;}  
+QSlider::add-page:horizontal:disabled { background: #eee;  border-color: #999;}  
+
+QSlider::handle:horizontal:disabled {  
+background: #eee;  
+border: 1px solid #aaa;  
+border-radius: 4px;}  
+</string>
+                 </property>
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>100</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item row="1" column="0">
+            <layout class="QVBoxLayout" name="verticalLayout_7">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_15">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QToolButton" name="LoadDownProthesisButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>微软雅黑</family>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">border:2px solid gray;border-radius:10px;padding:2px 4px;</string>
+                 </property>
+                 <property name="text">
+                  <string>Load</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="DentalHelper.qrc">
+                   <normaloff>:/DentalHelper/Resources/folder open.png</normaloff>:/DentalHelper/Resources/folder open.png</iconset>
+                 </property>
+                 <property name="toolButtonStyle">
+                  <enum>Qt::ToolButtonTextBesideIcon</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QToolButton" name="DownProthesisVisibilityButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>微软雅黑</family>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">border:2px solid gray;border-radius:10px;padding:2px 4px;</string>
+                 </property>
+                 <property name="text">
+                  <string>Down Prothesis</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="DentalHelper.qrc">
+                   <normaloff>:/DentalHelper/Resources/visibility_on_64.png</normaloff>:/DentalHelper/Resources/visibility_on_64.png</iconset>
+                 </property>
+                 <property name="toolButtonStyle">
+                  <enum>Qt::ToolButtonTextBesideIcon</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QToolButton" name="DeleteDownProthesisButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>微软雅黑</family>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">border:2px solid gray;border-radius:10px;padding:2px 4px;</string>
+                 </property>
+                 <property name="text">
+                  <string>Delete</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="DentalHelper.qrc">
+                   <normaloff>:/DentalHelper/Resources/delete_hole.png</normaloff>:/DentalHelper/Resources/delete_hole.png</iconset>
+                 </property>
+                 <property name="toolButtonStyle">
+                  <enum>Qt::ToolButtonTextBesideIcon</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_16">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QSpinBox" name="DownProthesisOpacitySpinBox">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>100</number>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="DownProthesisOpacitySlider">
+                 <property name="styleSheet">
+                  <string notr="true">QSlider::groove:horizontal {  
+border: 1px solid #4A708B;  
+background: #C0C0C0;  
+height: 5px;  
+border-radius: 1px;  
+padding-left:-1px;  
+padding-right:-1px;  
+}  
+
+QSlider::sub-page:horizontal {  
+background: qlineargradient(x1:0, y1:0, x2:0, y2:1,   
+stop:0 #B1B1B1, stop:1 #c4c4c4);  
+background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,  
+stop: 0 #5DCCFF, stop: 1 #1874CD);  
+border: 1px solid #4A708B;  
+height: 10px;  
+border-radius: 2px;  
+}  
+
+QSlider::add-page:horizontal {  
+background: #575757;  
+border: 0px solid #777;  
+height: 10px;  
+border-radius: 2px;  
+}  
+ 
+QSlider::handle:horizontal   
+{  
+background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,   
+stop:0.6 #45ADED, stop:0.778409 rgba(255, 255, 255, 255));  
+
+width: 11px;  
+margin-top: -3px;  
+ margin-bottom: -3px;  
+border-radius: 5px;  
+}  
+QSlider::handle:horizontal:hover {  
+background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0.6 #2A8BDA,   
+stop:0.778409 rgba(255, 255, 255, 255));  
+width: 11px;margin-top: -3px;margin-bottom: -3px;border-radius: 5px;}  
+
+QSlider::sub-page:horizontal:disabled { background: #00009C;  
+border-color: #999;}  
+QSlider::add-page:horizontal:disabled { background: #eee;  border-color: #999;}  
+
+QSlider::handle:horizontal:disabled {  
+background: #eee;  
+border: 1px solid #aaa;  
+border-radius: 4px;}  
+</string>
+                 </property>
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>100</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="0" column="3">
          <widget class="QPushButton" name="pushButton_2">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>70</width>
+            <height>16777215</height>
+           </size>
           </property>
           <property name="styleSheet">
            <string notr="true">border:2px solid gray;border-radius:10px;padding:2px 4px;</string>
@@ -1888,7 +1910,7 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>489</width>
+            <width>546</width>
             <height>20</height>
            </size>
           </property>
@@ -1897,6 +1919,410 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
        </layout>
       </widget>
      </widget>
+    </item>
+    <item row="1" column="0">
+     <layout class="QGridLayout" name="ViewGridLayout">
+      <item row="0" column="0">
+       <widget class="QWidget" name="UpLeftLayout" native="true">
+        <layout class="QGridLayout" name="gridLayout_5">
+         <item row="0" column="0">
+          <layout class="QVBoxLayout" name="UpLeftLayout_2">
+           <item>
+            <widget class="QVTKWidget" name="ModelQvtkWidget">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <item>
+              <widget class="QSlider" name="ModelOpacitySlider">
+               <property name="styleSheet">
+                <string notr="true">QSlider::groove:horizontal {  
+border: 1px solid #4A708B;  
+background: #C0C0C0;  
+height: 5px;  
+border-radius: 1px;  
+padding-left:-1px;  
+padding-right:-1px;  
+}  
+
+QSlider::sub-page:horizontal {  
+background: qlineargradient(x1:0, y1:0, x2:0, y2:1,   
+stop:0 #B1B1B1, stop:1 #c4c4c4);  
+background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,  
+stop: 0 #5DCCFF, stop: 1 #1874CD);  
+border: 1px solid #4A708B;  
+height: 10px;  
+border-radius: 2px;  
+}  
+
+QSlider::add-page:horizontal {  
+background: #575757;  
+border: 0px solid #777;  
+height: 10px;  
+border-radius: 2px;  
+}  
+ 
+QSlider::handle:horizontal   
+{  
+background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,   
+stop:0.6 #45ADED, stop:0.778409 rgba(255, 255, 255, 255));  
+
+width: 11px;  
+margin-top: -3px;  
+ margin-bottom: -3px;  
+border-radius: 5px;  
+}  
+QSlider::handle:horizontal:hover {  
+background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0.6 #2A8BDA,   
+stop:0.778409 rgba(255, 255, 255, 255));  
+width: 11px;margin-top: -3px;margin-bottom: -3px;border-radius: 5px;}  
+
+QSlider::sub-page:horizontal:disabled { background: #00009C;  
+border-color: #999;}  
+QSlider::add-page:horizontal:disabled { background: #eee;  border-color: #999;}  
+
+QSlider::handle:horizontal:disabled {  
+background: #eee;  
+border: 1px solid #aaa;  
+border-radius: 4px;}  
+</string>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>100</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="ModelOpacitySpinBox">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>100</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="ModelColorButton">
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(255, 255, 0);
+QPushButton{border:2px solid gray;border-radius:10px;padding:2px 4px;}
+</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QWidget" name="UpRightLayout" native="true">
+        <layout class="QGridLayout" name="gridLayout_6">
+         <item row="0" column="0">
+          <layout class="QVBoxLayout" name="UpRightLayout_2">
+           <item>
+            <widget class="QVTKWidget" name="UpRightQvtkWidget">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <item>
+              <widget class="QSlider" name="UpRightSlider">
+               <property name="styleSheet">
+                <string notr="true">QSlider::groove:horizontal {  
+border: 1px solid #4A708B;  
+background: #C0C0C0;  
+height: 5px;  
+border-radius: 1px;  
+padding-left:-1px;  
+padding-right:-1px;  
+}  
+
+QSlider::sub-page:horizontal {  
+background: qlineargradient(x1:0, y1:0, x2:0, y2:1,   
+stop:0 #B1B1B1, stop:1 #c4c4c4);  
+background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,  
+stop: 0 #5DCCFF, stop: 1 #1874CD);  
+border: 1px solid #4A708B;  
+height: 10px;  
+border-radius: 2px;  
+}  
+
+QSlider::add-page:horizontal {  
+background: #575757;  
+border: 0px solid #777;  
+height: 10px;  
+border-radius: 2px;  
+}  
+ 
+QSlider::handle:horizontal   
+{  
+background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,   
+stop:0.6 #45ADED, stop:0.778409 rgba(255, 255, 255, 255));  
+
+width: 11px;  
+margin-top: -3px;  
+ margin-bottom: -3px;  
+border-radius: 5px;  
+}  
+QSlider::handle:horizontal:hover {  
+background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0.6 #2A8BDA,   
+stop:0.778409 rgba(255, 255, 255, 255));  
+width: 11px;margin-top: -3px;margin-bottom: -3px;border-radius: 5px;}  
+
+QSlider::sub-page:horizontal:disabled { background: #00009C;  
+border-color: #999;}  
+QSlider::add-page:horizontal:disabled { background: #eee;  border-color: #999;}  
+
+QSlider::handle:horizontal:disabled {  
+background: #eee;  
+border: 1px solid #aaa;  
+border-radius: 4px;}  
+</string>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="UpRightSpinBox">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QWidget" name="LowerLeftLayout" native="true">
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="0" column="0">
+          <layout class="QVBoxLayout" name="LowerLeftLayout_2">
+           <item>
+            <widget class="QVTKWidget" name="LowerLeftQvtkWidget">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_8">
+             <item>
+              <widget class="QSlider" name="LowerLeftSlider">
+               <property name="styleSheet">
+                <string notr="true">QSlider::groove:horizontal {  
+border: 1px solid #4A708B;  
+background: #C0C0C0;  
+height: 5px;  
+border-radius: 1px;  
+padding-left:-1px;  
+padding-right:-1px;  
+}  
+
+QSlider::sub-page:horizontal {  
+background: qlineargradient(x1:0, y1:0, x2:0, y2:1,   
+stop:0 #B1B1B1, stop:1 #c4c4c4);  
+background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,  
+stop: 0 #5DCCFF, stop: 1 #1874CD);  
+border: 1px solid #4A708B;  
+height: 10px;  
+border-radius: 2px;  
+}  
+
+QSlider::add-page:horizontal {  
+background: #575757;  
+border: 0px solid #777;  
+height: 10px;  
+border-radius: 2px;  
+}  
+ 
+QSlider::handle:horizontal   
+{  
+background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,   
+stop:0.6 #45ADED, stop:0.778409 rgba(255, 255, 255, 255));  
+
+width: 11px;  
+margin-top: -3px;  
+ margin-bottom: -3px;  
+border-radius: 5px;  
+}  
+QSlider::handle:horizontal:hover {  
+background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0.6 #2A8BDA,   
+stop:0.778409 rgba(255, 255, 255, 255));  
+width: 11px;margin-top: -3px;margin-bottom: -3px;border-radius: 5px;}  
+
+QSlider::sub-page:horizontal:disabled { background: #00009C;  
+border-color: #999;}  
+QSlider::add-page:horizontal:disabled { background: #eee;  border-color: #999;}  
+
+QSlider::handle:horizontal:disabled {  
+background: #eee;  
+border: 1px solid #aaa;  
+border-radius: 4px;}  
+</string>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="LowerLeftSpinBox">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QWidget" name="LowerRightLayout" native="true">
+        <layout class="QGridLayout" name="gridLayout_4">
+         <item row="0" column="0">
+          <layout class="QVBoxLayout" name="LowerRightLayout_2">
+           <item>
+            <widget class="QVTKWidget" name="LowerRightQvtkWidget">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_10">
+             <item>
+              <widget class="QSlider" name="LowerRightSlider">
+               <property name="styleSheet">
+                <string notr="true">QSlider::groove:horizontal {  
+border: 1px solid #4A708B;  
+background: #C0C0C0;  
+height: 5px;  
+border-radius: 1px;  
+padding-left:-1px;  
+padding-right:-1px;  
+}  
+
+QSlider::sub-page:horizontal {  
+background: qlineargradient(x1:0, y1:0, x2:0, y2:1,   
+stop:0 #B1B1B1, stop:1 #c4c4c4);  
+background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,  
+stop: 0 #5DCCFF, stop: 1 #1874CD);  
+border: 1px solid #4A708B;  
+height: 10px;  
+border-radius: 2px;  
+}  
+
+QSlider::add-page:horizontal {  
+background: #575757;  
+border: 0px solid #777;  
+height: 10px;  
+border-radius: 2px;  
+}  
+ 
+QSlider::handle:horizontal   
+{  
+background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,   
+stop:0.6 #45ADED, stop:0.778409 rgba(255, 255, 255, 255));  
+
+width: 11px;  
+margin-top: -3px;  
+ margin-bottom: -3px;  
+border-radius: 5px;  
+}  
+QSlider::handle:horizontal:hover {  
+background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0.6 #2A8BDA,   
+stop:0.778409 rgba(255, 255, 255, 255));  
+width: 11px;margin-top: -3px;margin-bottom: -3px;border-radius: 5px;}  
+
+QSlider::sub-page:horizontal:disabled { background: #00009C;  
+border-color: #999;}  
+QSlider::add-page:horizontal:disabled { background: #eee;  border-color: #999;}  
+
+QSlider::handle:horizontal:disabled {  
+background: #eee;  
+border: 1px solid #aaa;  
+border-radius: 4px;}  
+</string>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="LowerRightSpinBox">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -1925,12 +2351,12 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1090</x>
-     <y>77</y>
+     <x>1098</x>
+     <y>99</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1318</x>
-     <y>72</y>
+     <x>1163</x>
+     <y>100</y>
     </hint>
    </hints>
   </connection>
@@ -1941,12 +2367,12 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1325</x>
-     <y>76</y>
+     <x>1163</x>
+     <y>100</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1177</x>
-     <y>79</y>
+     <x>1098</x>
+     <y>99</y>
     </hint>
    </hints>
   </connection>
@@ -1957,12 +2383,12 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1129</x>
-     <y>98</y>
+     <x>1098</x>
+     <y>146</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1325</x>
-     <y>96</y>
+     <x>1163</x>
+     <y>146</y>
     </hint>
    </hints>
   </connection>
@@ -1973,12 +2399,12 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1326</x>
-     <y>104</y>
+     <x>1163</x>
+     <y>146</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1197</x>
-     <y>105</y>
+     <x>1098</x>
+     <y>146</y>
     </hint>
    </hints>
   </connection>
@@ -1989,12 +2415,12 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1174</x>
-     <y>128</y>
+     <x>829</x>
+     <y>99</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1318</x>
-     <y>128</y>
+     <x>894</x>
+     <y>100</y>
     </hint>
    </hints>
   </connection>
@@ -2005,12 +2431,12 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1322</x>
-     <y>132</y>
+     <x>894</x>
+     <y>100</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1205</x>
-     <y>132</y>
+     <x>829</x>
+     <y>99</y>
     </hint>
    </hints>
   </connection>
@@ -2021,12 +2447,12 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1200</x>
-     <y>157</y>
+     <x>829</x>
+     <y>146</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1341</x>
-     <y>160</y>
+     <x>894</x>
+     <y>146</y>
     </hint>
    </hints>
   </connection>
@@ -2037,12 +2463,12 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1326</x>
-     <y>155</y>
+     <x>894</x>
+     <y>146</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1190</x>
-     <y>149</y>
+     <x>829</x>
+     <y>146</y>
     </hint>
    </hints>
   </connection>
@@ -2053,12 +2479,12 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>523</x>
-     <y>491</y>
+     <x>526</x>
+     <y>515</y>
     </hint>
     <hint type="destinationlabel">
-     <x>620</x>
-     <y>494</y>
+     <x>579</x>
+     <y>516</y>
     </hint>
    </hints>
   </connection>
@@ -2069,12 +2495,12 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>625</x>
-     <y>496</y>
+     <x>579</x>
+     <y>516</y>
     </hint>
     <hint type="destinationlabel">
-     <x>588</x>
-     <y>492</y>
+     <x>526</x>
+     <y>515</y>
     </hint>
    </hints>
   </connection>
@@ -2085,12 +2511,12 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>601</x>
-     <y>838</y>
+     <x>571</x>
+     <y>876</y>
     </hint>
     <hint type="destinationlabel">
-     <x>657</x>
-     <y>837</y>
+     <x>617</x>
+     <y>877</y>
     </hint>
    </hints>
   </connection>
@@ -2101,12 +2527,12 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>660</x>
-     <y>831</y>
+     <x>617</x>
+     <y>877</y>
     </hint>
     <hint type="destinationlabel">
-     <x>626</x>
-     <y>828</y>
+     <x>571</x>
+     <y>876</y>
     </hint>
    </hints>
   </connection>
@@ -2117,12 +2543,12 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1298</x>
-     <y>501</y>
+     <x>1203</x>
+     <y>515</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1354</x>
-     <y>497</y>
+     <x>1249</x>
+     <y>516</y>
     </hint>
    </hints>
   </connection>
@@ -2133,12 +2559,12 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1364</x>
-     <y>494</y>
+     <x>1249</x>
+     <y>516</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1301</x>
-     <y>496</y>
+     <x>1203</x>
+     <y>515</y>
     </hint>
    </hints>
   </connection>
@@ -2149,12 +2575,12 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1251</x>
-     <y>833</y>
+     <x>1203</x>
+     <y>876</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1345</x>
-     <y>833</y>
+     <x>1249</x>
+     <y>877</y>
     </hint>
    </hints>
   </connection>
@@ -2165,12 +2591,76 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1360</x>
-     <y>837</y>
+     <x>1249</x>
+     <y>877</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1292</x>
-     <y>835</y>
+     <x>1203</x>
+     <y>876</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>UpProthesisOpacitySlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>UpProthesisOpacitySpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>990</x>
+     <y>110</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>938</x>
+     <y>110</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>UpProthesisOpacitySpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>UpProthesisOpacitySlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>911</x>
+     <y>114</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1111</x>
+     <y>109</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DownProthesisOpacitySpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>DownProthesisOpacitySlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>926</x>
+     <y>152</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>980</x>
+     <y>152</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DownProthesisOpacitySlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>DownProthesisOpacitySpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1133</x>
+     <y>159</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>928</x>
+     <y>155</y>
     </hint>
    </hints>
   </connection>

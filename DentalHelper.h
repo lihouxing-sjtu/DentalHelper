@@ -168,6 +168,11 @@ private:
 	vtkSmartPointer<vtkActor> m_CutActorForRightNurveInCross;
 	vtkSmartPointer<vtkActor> m_CutActorForRightNurveInAxial;
 
+
+	//上颌假牙模型
+	vtkSmartPointer<vtkPolyData> m_UpProthesisData;
+	vtkSmartPointer<vtkActor> m_UpProthesisActor;
+
 	//切换axial和arch curve的action
 	QMenu* m_MenuForUpRight;
 	QAction* m_Change2ArchCurve;
@@ -300,4 +305,14 @@ protected slots:
 	void OnChange2AxialView();
 	//up right切换到arch curve
 	void OnChange2ArchCurve();
+	//添加上颌假体模型
+	void OnLoadUpProthesis();
+	//调整上颌假体的透明度
+	void OnChangeUpProthesisOpacity(int);
+	//删除上颌假体
+	void OnDeleteUpProthesis();
+	//上颌假体的可见性
+	void OnUpProthesisVisibility();
+
+
 };

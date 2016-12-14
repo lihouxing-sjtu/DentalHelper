@@ -113,6 +113,10 @@ DentalHelper::DentalHelper(QWidget *parent)
 	m_CutActorForRightNurveInCross = vtkSmartPointer<vtkActor>::New();
 	m_CutActorForRightNurveInAxial = vtkSmartPointer<vtkActor>::New();
 
+
+	m_UpProthesisData = vtkSmartPointer<vtkPolyData>::New();
+	m_UpProthesisActor = vtkSmartPointer<vtkActor>::New();
+
 	m_EventQtConnector = vtkSmartPointer<vtkEventQtSlotConnect>::New();
 
 
@@ -164,6 +168,11 @@ DentalHelper::DentalHelper(QWidget *parent)
 
 	connect(m_Change2Axial, SIGNAL(triggered()), this, SLOT(OnChange2AxialView()));
 	connect(m_Change2ArchCurve, SIGNAL(triggered()), this, SLOT(OnChange2ArchCurve()));
+
+	connect(ui.LoadUpProthesisButton, SIGNAL(clicked()), this, SLOT(OnLoadUpProthesis()));
+	connect(ui.DeleteUpProthesisButton, SIGNAL(clicked()), this, SLOT(OnDeleteUpProthesis()));
+	connect(ui.UpProthesisOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(OnChangeUpProthesisOpacity(int)));
+	connect(ui.UpProthesisVisibilityButton, SIGNAL(clicked()), this, SLOT(OnUpProthesisVisibility()));
 
 }
 
@@ -1254,6 +1263,19 @@ void DentalHelper::OnChangePanaromicInteractionStyle()
 	}
 	m_LowerLeftRendWin->Render();
 }
+void DentalHelper::OnChangeUpProthesisOpacity(int value)
+{
+	//如果没有模型，返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_UpProthesisActor))
+	{
+		ui.UpProthesisOpacitySlider->setValue(100);
+		return;
+	}
+	m_UpProthesisActor->GetProperty()->SetOpacity(value / 100.0);
+	m_ModelRendWin->Render();
+}
+
+
 void DentalHelper::OnContourForLeftCurveInterAction()
 {
 	this->CutLeftNurveInCrossView();
@@ -1352,6 +1374,22 @@ void DentalHelper::OnDeleteLastNodeForRightNurve()
 	m_ContourRepForRightNurve->DeleteLastNode();
 	m_ModelRendWin->Render();
 	m_LowerLeftRendWin->Render();
+}
+
+void DentalHelper::OnDeleteUpProthesis()
+{
+	//如果没有模型，返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_UpProthesisActor))
+	{
+		return;
+	}
+	if (QMessageBox::information(this, "Remove Up Prothesis", "Are you sure to remove the up prothesis?", QMessageBox::Ok | QMessageBox::Cancel)==QMessageBox::Cancel)
+	{
+		return;
+	}
+	m_ModelRenderer->RemoveActor(m_UpProthesisActor);
+	m_ModelRendWin->Render();
+	//还应该要删除在其他视图中的轮廓线
 }
 
 
@@ -1629,6 +1667,34 @@ void DentalHelper::OnImageTableCellClicked(int row, int columm)
 		//显示item的详细信息
 	}
 }
+void DentalHelper::OnLoadUpProthesis()
+{
+	QString path = QFileDialog::getOpenFileName(this, "Choose the Up Prothesis model", nullptr, "(*.stl)");
+	if (path.isEmpty())
+	{
+		return;
+	}
+	auto stlReader = vtkSmartPointer<vtkSTLReader>::New();
+	stlReader->SetFileName(qPrintable(path));
+	stlReader->Update();
+
+	m_UpProthesisData = stlReader->GetOutput();
+	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputData(m_UpProthesisData);
+	m_UpProthesisActor->SetMapper(mapper);
+	m_UpProthesisActor->GetProperty()->SetColor(0, 1, 0);
+	m_UpProthesisActor->GetProperty()->SetAmbient(0);
+	m_UpProthesisActor->GetProperty()->SetDiffuse(1);
+	m_UpProthesisActor->GetProperty()->SetSpecular(0);
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_UpProthesisActor))
+	{
+		m_ModelRenderer->AddActor(m_UpProthesisActor);
+	}
+	m_ModelRendWin->Render();
+
+}
+
+
 void DentalHelper::OnLowerLeftViewButton()
 {
 	if (isShowLowerLeftView)
@@ -1994,6 +2060,30 @@ void DentalHelper::OnUpLeftViewButton()
 		ui.UpLeftLayout->show();
 	}
 	this->SetSuitableLayout();
+}
+
+void DentalHelper::OnUpProthesisVisibility()
+{
+	//如果没有模型，返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_UpProthesisActor))
+	{
+		return;
+	}
+	if (m_UpProthesisActor->GetVisibility())
+	{
+		m_UpProthesisActor->VisibilityOff();
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/visibility_off_64.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.UpProthesisVisibilityButton->setIcon(icon);
+	}
+	else
+	{
+		m_UpProthesisActor->VisibilityOn();
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/visibility_on_64.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.UpProthesisVisibilityButton->setIcon(icon);
+	}
+	m_ModelRendWin->Render();
 }
 
 
