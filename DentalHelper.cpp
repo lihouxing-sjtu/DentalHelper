@@ -109,13 +109,28 @@ DentalHelper::DentalHelper(QWidget *parent)
 
 	m_CutActorForLeftNurveInCross = vtkSmartPointer<vtkActor>::New();
 	m_CutActorForLeftNurveInAxial = vtkSmartPointer<vtkActor>::New();
+	m_CutActorForLeftNurveInCoronal = vtkSmartPointer<vtkActor>::New();
+	m_CutActorForLeftNurveInSagital = vtkSmartPointer<vtkActor>::New();
 
 	m_CutActorForRightNurveInCross = vtkSmartPointer<vtkActor>::New();
 	m_CutActorForRightNurveInAxial = vtkSmartPointer<vtkActor>::New();
+	m_CutActorForRightNurveInCoronal = vtkSmartPointer<vtkActor>::New();
+	m_CutActorForRightNurveInSagital = vtkSmartPointer<vtkActor>::New();
 
 
 	m_UpProthesisData = vtkSmartPointer<vtkPolyData>::New();
 	m_UpProthesisActor = vtkSmartPointer<vtkActor>::New();
+
+	m_CutActorForUpProthesisInAxial = vtkSmartPointer<vtkActor>::New();
+	m_CutActorForUpProthesisInCoronal = vtkSmartPointer<vtkActor>::New();
+	m_CutActorForUpProthesisInSagital = vtkSmartPointer<vtkActor>::New();
+
+	m_DownProthesisData = vtkSmartPointer<vtkPolyData>::New();
+	m_DownProthesisActor = vtkSmartPointer<vtkActor>::New();
+
+	m_CutActorForDownProthesisInAxial = vtkSmartPointer<vtkActor>::New();
+	m_CutActorForDownProthesisInCoronal = vtkSmartPointer<vtkActor>::New();
+	m_CutActorForDownProthesisInSagital = vtkSmartPointer<vtkActor>::New();
 
 	m_EventQtConnector = vtkSmartPointer<vtkEventQtSlotConnect>::New();
 
@@ -173,12 +188,127 @@ DentalHelper::DentalHelper(QWidget *parent)
 	connect(ui.DeleteUpProthesisButton, SIGNAL(clicked()), this, SLOT(OnDeleteUpProthesis()));
 	connect(ui.UpProthesisOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(OnChangeUpProthesisOpacity(int)));
 	connect(ui.UpProthesisVisibilityButton, SIGNAL(clicked()), this, SLOT(OnUpProthesisVisibility()));
+	connect(ui.LoadDownProthesisButton, SIGNAL(clicked()), this, SLOT(OnLoadDownProthesis()));
+	connect(ui.DeleteDownProthesisButton, SIGNAL(clicked()), this, SLOT(OnDeleteDownProthesis()));
+	connect(ui.DownProthesisOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(OnChangeDownProthesisOpacity(int)));
+	connect(ui.DownProthesisVisibilityButton, SIGNAL(clicked()), this, SLOT(OnDownProthesisVisibility()));
 
 }
 
 DentalHelper::~DentalHelper()
 {
 	delete m_ProgressDialog;
+}
+void DentalHelper::CutDownProthesisInAxialView()
+{
+	//如果没有模型，返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_DownProthesisActor))
+	{
+		return;
+	}
+
+	double normalOfCut[3] = { 0,0,1 };
+	double centerOfCut[3];
+	centerOfCut[0] = m_Origin[0] + m_SagitalViewer->GetSlice()*m_Spacing[0];
+	centerOfCut[1] = m_Origin[1] + m_CoronalViewer->GetSlice()*m_Spacing[1];
+	centerOfCut[2] = m_Origin[2] + m_AxialViewer->GetSlice()*m_Spacing[2];
+	auto planeOfCut = vtkSmartPointer<vtkPlane>::New();
+	planeOfCut->SetOrigin(centerOfCut);
+	planeOfCut->SetNormal(normalOfCut);
+
+	auto cutter = vtkSmartPointer<vtkCutter>::New();
+	cutter->SetInputData(m_DownProthesisData);
+	cutter->SetCutFunction(planeOfCut);
+	cutter->Update();
+
+	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputData(cutter->GetOutput());
+
+	m_CutActorForDownProthesisInAxial->SetMapper(mapper);
+	m_CutActorForDownProthesisInAxial->GetProperty()->SetColor(0, 1, 0);
+	m_CutActorForDownProthesisInAxial->GetProperty()->SetAmbient(1);
+	m_CutActorForDownProthesisInAxial->GetProperty()->SetSpecular(0);
+	m_CutActorForDownProthesisInAxial->GetProperty()->SetDiffuse(1);
+	if (!m_UpRightRenderer->GetActors()->IsItemPresent(m_CutActorForDownProthesisInAxial))
+	{
+		m_UpRightRenderer->AddActor(m_CutActorForDownProthesisInAxial);
+	}
+	m_UpRightRendWin->Render();
+
+}
+
+void DentalHelper::CutDownProthesisInCoronalView()
+{
+	//如果没有模型，返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_DownProthesisActor))
+	{
+		return;
+	}
+
+	double normalOfCut[3] = { 0,1,0 };
+	double centerOfCut[3];
+	centerOfCut[0] = m_Origin[0] + m_SagitalViewer->GetSlice()*m_Spacing[0];
+	centerOfCut[1] = m_Origin[1] + m_CoronalViewer->GetSlice()*m_Spacing[1];
+	centerOfCut[2] = m_Origin[2] + m_AxialViewer->GetSlice()*m_Spacing[2];
+	auto planeOfCut = vtkSmartPointer<vtkPlane>::New();
+	planeOfCut->SetOrigin(centerOfCut);
+	planeOfCut->SetNormal(normalOfCut);
+
+	auto cutter = vtkSmartPointer<vtkCutter>::New();
+	cutter->SetInputData(m_DownProthesisData);
+	cutter->SetCutFunction(planeOfCut);
+	cutter->Update();
+
+	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputData(cutter->GetOutput());
+
+	m_CutActorForDownProthesisInCoronal->SetMapper(mapper);
+	m_CutActorForDownProthesisInCoronal->GetProperty()->SetColor(0, 1, 0);
+	m_CutActorForDownProthesisInCoronal->GetProperty()->SetAmbient(1);
+	m_CutActorForDownProthesisInCoronal->GetProperty()->SetSpecular(0);
+	m_CutActorForDownProthesisInCoronal->GetProperty()->SetDiffuse(1);
+	if (!m_LowerLeftRenderer->GetActors()->IsItemPresent(m_CutActorForDownProthesisInCoronal))
+	{
+		m_LowerLeftRenderer->AddActor(m_CutActorForDownProthesisInCoronal);
+	}
+	m_LowerLeftRendWin->Render();
+}
+
+void DentalHelper::CutDownProthesisInSagitalView()
+{
+	//如果没有模型，返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_DownProthesisActor))
+	{
+		return;
+	}
+
+	double normalOfCut[3] = { 1,0,0 };
+	double centerOfCut[3];
+	centerOfCut[0] = m_Origin[0] + m_SagitalViewer->GetSlice()*m_Spacing[0];
+	centerOfCut[1] = m_Origin[1] + m_CoronalViewer->GetSlice()*m_Spacing[1];
+	centerOfCut[2] = m_Origin[2] + m_AxialViewer->GetSlice()*m_Spacing[2];
+	auto planeOfCut = vtkSmartPointer<vtkPlane>::New();
+	planeOfCut->SetOrigin(centerOfCut);
+	planeOfCut->SetNormal(normalOfCut);
+
+	auto cutter = vtkSmartPointer<vtkCutter>::New();
+	cutter->SetInputData(m_DownProthesisData);
+	cutter->SetCutFunction(planeOfCut);
+	cutter->Update();
+
+	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputData(cutter->GetOutput());
+
+	m_CutActorForDownProthesisInSagital->SetMapper(mapper);
+	m_CutActorForDownProthesisInSagital->GetProperty()->SetColor(0, 1, 0);
+	m_CutActorForDownProthesisInSagital->GetProperty()->SetAmbient(1);
+	m_CutActorForDownProthesisInSagital->GetProperty()->SetSpecular(0);
+	m_CutActorForDownProthesisInSagital->GetProperty()->SetDiffuse(1);
+	if (!m_LowerRightRenderer->GetActors()->IsItemPresent(m_CutActorForDownProthesisInSagital))
+	{
+		m_LowerRightRenderer->AddActor(m_CutActorForDownProthesisInSagital);
+	}
+	m_LowerRightRendWin->Render();
 }
 void DentalHelper::CutLeftNurveInAxialView()
 {
@@ -217,6 +347,42 @@ void DentalHelper::CutLeftNurveInAxialView()
 	m_UpRightRendWin->Render();
 }
 
+void DentalHelper::CutLeftNurveInCoronalView()
+{
+	//如果没有画左边神经，则返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForLeftNurve))
+	{
+		return;
+	}
+
+	double normalOfCut[3] = { 0,1,0 };
+	double centerOfCut[3];
+	centerOfCut[0] = m_Origin[0] + m_SagitalViewer->GetSlice()*m_Spacing[0];
+	centerOfCut[1] = m_Origin[1] + m_CoronalViewer->GetSlice()*m_Spacing[1];
+	centerOfCut[2] = m_Origin[2] + m_AxialViewer->GetSlice()*m_Spacing[2];
+	auto planeOfCut = vtkSmartPointer<vtkPlane>::New();
+	planeOfCut->SetOrigin(centerOfCut);
+	planeOfCut->SetNormal(normalOfCut);
+
+	auto cutter = vtkSmartPointer<vtkCutter>::New();
+	cutter->SetInputData(m_TubeForLeftNurve->GetOutput());
+	cutter->SetCutFunction(planeOfCut);
+	cutter->Update();
+
+	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputData(cutter->GetOutput());
+
+	m_CutActorForLeftNurveInCoronal->SetMapper(mapper);
+	m_CutActorForLeftNurveInCoronal->GetProperty()->SetColor(1,0, 0);
+	m_CutActorForLeftNurveInCoronal->GetProperty()->SetAmbient(1);
+	m_CutActorForLeftNurveInCoronal->GetProperty()->SetSpecular(0);
+	m_CutActorForLeftNurveInCoronal->GetProperty()->SetDiffuse(1);
+	if (!m_LowerLeftRenderer->GetActors()->IsItemPresent(m_CutActorForLeftNurveInCoronal))
+	{
+		m_LowerLeftRenderer->AddActor(m_CutActorForLeftNurveInCoronal);
+	}
+	m_LowerLeftRendWin->Render();
+}
 
 void DentalHelper::CutLeftNurveInCrossView()
 {
@@ -242,6 +408,41 @@ void DentalHelper::CutLeftNurveInCrossView()
 	if (!m_LowerRightRenderer->GetActors()->IsItemPresent(m_CutActorForLeftNurveInCross))
 	{
 		m_LowerRightRenderer->AddActor(m_CutActorForLeftNurveInCross);
+	}
+	m_LowerRightRendWin->Render();
+}
+void DentalHelper::CutLeftNurveInSagitalView()
+{
+	//如果没有画左边神经，则返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForLeftNurve))
+	{
+		return;
+	}
+	double normalOfCut[3] = { 1,0,0 };
+	double centerOfCut[3];
+	centerOfCut[0] = m_Origin[0] + m_SagitalViewer->GetSlice()*m_Spacing[0];
+	centerOfCut[1] = m_Origin[1] + m_CoronalViewer->GetSlice()*m_Spacing[1];
+	centerOfCut[2] = m_Origin[2] + m_AxialViewer->GetSlice()*m_Spacing[2];
+	auto planeOfCut = vtkSmartPointer<vtkPlane>::New();
+	planeOfCut->SetOrigin(centerOfCut);
+	planeOfCut->SetNormal(normalOfCut);
+
+	auto cutter = vtkSmartPointer<vtkCutter>::New();
+	cutter->SetInputData(m_TubeForLeftNurve->GetOutput());
+	cutter->SetCutFunction(planeOfCut);
+	cutter->Update();
+
+	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputData(cutter->GetOutput());
+
+	m_CutActorForLeftNurveInSagital->SetMapper(mapper);
+	m_CutActorForLeftNurveInSagital->GetProperty()->SetColor(1, 0, 0);
+	m_CutActorForLeftNurveInSagital->GetProperty()->SetAmbient(1);
+	m_CutActorForLeftNurveInSagital->GetProperty()->SetSpecular(0);
+	m_CutActorForLeftNurveInSagital->GetProperty()->SetDiffuse(1);
+	if (!m_LowerRightRenderer->GetActors()->IsItemPresent(m_CutActorForLeftNurveInSagital))
+	{
+		m_LowerRightRenderer->AddActor(m_CutActorForLeftNurveInSagital);
 	}
 	m_LowerRightRendWin->Render();
 }
@@ -281,9 +482,43 @@ void DentalHelper::CutRightNurveInAxialView()
 	m_UpRightRendWin->Render();
 
 }
+void DentalHelper::CutRightNurveInCoronalView()
+{
+	//如果没有画右边神经则返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForRightNurve))
+	{
+		return;
+	}
+	double normalOfCut[3] = { 0,1,0 };
+	double centerOfCut[3];
+	centerOfCut[0] = m_Origin[0] + m_SagitalViewer->GetSlice()*m_Spacing[0];
+	centerOfCut[1] = m_Origin[1] + m_CoronalViewer->GetSlice()*m_Spacing[1];
+	centerOfCut[2] = m_Origin[2] + m_AxialViewer->GetSlice()*m_Spacing[2];
+	auto planeOfCut = vtkSmartPointer<vtkPlane>::New();
+	planeOfCut->SetOrigin(centerOfCut);
+	planeOfCut->SetNormal(normalOfCut);
 
+	auto cutter = vtkSmartPointer<vtkCutter>::New();
+	cutter->SetInputData(m_TubeForRightNurve->GetOutput());
+	cutter->SetCutFunction(planeOfCut);
+	cutter->Update();
 
-void DentalHelper::CurRightNurveInCrossView()
+	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputData(cutter->GetOutput());
+
+	m_CutActorForRightNurveInCoronal->SetMapper(mapper);
+	m_CutActorForRightNurveInCoronal->GetProperty()->SetColor(1, 0, 0);
+	m_CutActorForRightNurveInCoronal->GetProperty()->SetAmbient(1);
+	m_CutActorForRightNurveInCoronal->GetProperty()->SetSpecular(0);
+	m_CutActorForRightNurveInCoronal->GetProperty()->SetDiffuse(1);
+	if (!m_LowerLeftRenderer->GetActors()->IsItemPresent(m_CutActorForRightNurveInCoronal))
+	{
+		m_LowerLeftRenderer->AddActor(m_CutActorForRightNurveInCoronal);
+	}
+	m_LowerLeftRendWin->Render();
+}
+
+void DentalHelper::CutRightNurveInCrossView()
 {
 	//如果没有画右边神经则返回
 	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForRightNurve))
@@ -309,6 +544,161 @@ void DentalHelper::CurRightNurveInCrossView()
 	}
 	m_LowerRightRendWin->Render();
 }
+
+
+
+
+void DentalHelper::CutRightNurveInSagitalView()
+{
+	//如果没有画左边神经，则返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForRightNurve))
+	{
+		return;
+	}
+	double normalOfCut[3] = { 1,0,0 };
+	double centerOfCut[3];
+	centerOfCut[0] = m_Origin[0] + m_SagitalViewer->GetSlice()*m_Spacing[0];
+	centerOfCut[1] = m_Origin[1] + m_CoronalViewer->GetSlice()*m_Spacing[1];
+	centerOfCut[2] = m_Origin[2] + m_AxialViewer->GetSlice()*m_Spacing[2];
+	auto planeOfCut = vtkSmartPointer<vtkPlane>::New();
+	planeOfCut->SetOrigin(centerOfCut);
+	planeOfCut->SetNormal(normalOfCut);
+
+	auto cutter = vtkSmartPointer<vtkCutter>::New();
+	cutter->SetInputData(m_TubeForRightNurve->GetOutput());
+	cutter->SetCutFunction(planeOfCut);
+	cutter->Update();
+
+	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputData(cutter->GetOutput());
+
+	m_CutActorForRightNurveInSagital->SetMapper(mapper);
+	m_CutActorForRightNurveInSagital->GetProperty()->SetColor(1, 0, 0);
+	m_CutActorForRightNurveInSagital->GetProperty()->SetAmbient(1);
+	m_CutActorForRightNurveInSagital->GetProperty()->SetSpecular(0);
+	m_CutActorForRightNurveInSagital->GetProperty()->SetDiffuse(1);
+	if (!m_LowerRightRenderer->GetActors()->IsItemPresent(m_CutActorForRightNurveInSagital))
+	{
+		m_LowerRightRenderer->AddActor(m_CutActorForRightNurveInSagital);
+	}
+	m_LowerRightRendWin->Render();
+}
+
+
+void DentalHelper::CutUpProthesisInAxialView()
+{
+	//如果没有模型，返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_UpProthesisActor))
+	{
+		return;
+	}
+
+	double normalOfCut[3] = { 0,0,1 };
+	double centerOfCut[3];
+	centerOfCut[0] = m_Origin[0] + m_SagitalViewer->GetSlice()*m_Spacing[0];
+	centerOfCut[1] = m_Origin[1] + m_CoronalViewer->GetSlice()*m_Spacing[1];
+	centerOfCut[2] = m_Origin[2] + m_AxialViewer->GetSlice()*m_Spacing[2];
+	auto planeOfCut = vtkSmartPointer<vtkPlane>::New();
+	planeOfCut->SetOrigin(centerOfCut);
+	planeOfCut->SetNormal(normalOfCut);
+
+	auto cutter = vtkSmartPointer<vtkCutter>::New();
+	cutter->SetInputData(m_UpProthesisData);
+	cutter->SetCutFunction(planeOfCut);
+	cutter->Update();
+
+	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputData(cutter->GetOutput());
+
+	m_CutActorForUpProthesisInAxial->SetMapper(mapper);
+	m_CutActorForUpProthesisInAxial->GetProperty()->SetColor(0, 1, 0);
+	m_CutActorForUpProthesisInAxial->GetProperty()->SetAmbient(1);
+	m_CutActorForUpProthesisInAxial->GetProperty()->SetSpecular(0);
+	m_CutActorForUpProthesisInAxial->GetProperty()->SetDiffuse(1);
+	if (!m_UpRightRenderer->GetActors()->IsItemPresent(m_CutActorForUpProthesisInAxial))
+	{
+		m_UpRightRenderer->AddActor(m_CutActorForUpProthesisInAxial);
+	}
+	m_UpRightRendWin->Render();
+
+}
+
+void DentalHelper::CutUpProthesisInCoronalView()
+{
+	//如果没有模型，返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_UpProthesisActor))
+	{
+		return;
+	}
+
+	double normalOfCut[3] = { 0,1,0 };
+	double centerOfCut[3];
+	centerOfCut[0] = m_Origin[0] + m_SagitalViewer->GetSlice()*m_Spacing[0];
+	centerOfCut[1] = m_Origin[1] + m_CoronalViewer->GetSlice()*m_Spacing[1];
+	centerOfCut[2] = m_Origin[2] + m_AxialViewer->GetSlice()*m_Spacing[2];
+	auto planeOfCut = vtkSmartPointer<vtkPlane>::New();
+	planeOfCut->SetOrigin(centerOfCut);
+	planeOfCut->SetNormal(normalOfCut);
+
+	auto cutter = vtkSmartPointer<vtkCutter>::New();
+	cutter->SetInputData(m_UpProthesisData);
+	cutter->SetCutFunction(planeOfCut);
+	cutter->Update();
+
+	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputData(cutter->GetOutput());
+
+	m_CutActorForUpProthesisInCoronal->SetMapper(mapper);
+	m_CutActorForUpProthesisInCoronal->GetProperty()->SetColor(0, 1, 0);
+	m_CutActorForUpProthesisInCoronal->GetProperty()->SetAmbient(1);
+	m_CutActorForUpProthesisInCoronal->GetProperty()->SetSpecular(0);
+	m_CutActorForUpProthesisInCoronal->GetProperty()->SetDiffuse(1);
+	if (!m_LowerLeftRenderer->GetActors()->IsItemPresent(m_CutActorForUpProthesisInCoronal))
+	{
+		m_LowerLeftRenderer->AddActor(m_CutActorForUpProthesisInCoronal);
+	}
+	m_LowerLeftRendWin->Render();
+}
+void DentalHelper::CutUpProthesisInSagitalView()
+{
+	//如果没有模型，返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_UpProthesisActor))
+	{
+		return;
+	}
+
+	double normalOfCut[3] = { 1,0,0 };
+	double centerOfCut[3];
+	centerOfCut[0] = m_Origin[0] + m_SagitalViewer->GetSlice()*m_Spacing[0];
+	centerOfCut[1] = m_Origin[1] + m_CoronalViewer->GetSlice()*m_Spacing[1];
+	centerOfCut[2] = m_Origin[2] + m_AxialViewer->GetSlice()*m_Spacing[2];
+	auto planeOfCut = vtkSmartPointer<vtkPlane>::New();
+	planeOfCut->SetOrigin(centerOfCut);
+	planeOfCut->SetNormal(normalOfCut);
+
+	auto cutter = vtkSmartPointer<vtkCutter>::New();
+	cutter->SetInputData(m_UpProthesisData);
+	cutter->SetCutFunction(planeOfCut);
+	cutter->Update();
+
+	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputData(cutter->GetOutput());
+
+	m_CutActorForUpProthesisInSagital->SetMapper(mapper);
+	m_CutActorForUpProthesisInSagital->GetProperty()->SetColor(0, 1, 0);
+	m_CutActorForUpProthesisInSagital->GetProperty()->SetAmbient(1);
+	m_CutActorForUpProthesisInSagital->GetProperty()->SetSpecular(0);
+	m_CutActorForUpProthesisInSagital->GetProperty()->SetDiffuse(1);
+	if (!m_LowerRightRenderer->GetActors()->IsItemPresent(m_CutActorForUpProthesisInSagital))
+	{
+		m_LowerRightRenderer->AddActor(m_CutActorForUpProthesisInSagital);
+	}
+	m_LowerRightRendWin->Render();
+}
+
+
+
+
 
 
 void DentalHelper::DrawAxialLine()
@@ -723,7 +1113,7 @@ void DentalHelper::GenerateCrossReslice()
 	m_LowerRightRendWin->Render();
 
 	this->CutLeftNurveInCrossView();//切割左边神经
-	this->CurRightNurveInCrossView();//切割右边神经
+	this->CutRightNurveInCrossView();//切割右边神经
 
 }
 
@@ -1237,9 +1627,21 @@ void DentalHelper::OnChange2AxialView()
 
 	this->CutLeftNurveInAxialView();
 	this->CutRightNurveInAxialView();
-
+	this->CutUpProthesisInAxialView();
 	double normalOfAxialCamera[3] = { 0,0,1 };
 	this->UpDateCamera(m_UpRightRenderer, normalOfAxialCamera, 0);
+}
+
+void DentalHelper::OnChangeDownProthesisOpacity(int value)
+{
+	//如果没有模型，返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_DownProthesisActor))
+	{
+		ui.DownProthesisOpacitySlider->setValue(100);
+		return;
+	}
+	m_DownProthesisActor->GetProperty()->SetOpacity(value / 100.0);
+	m_ModelRendWin->Render();
 }
 
 
@@ -1284,7 +1686,7 @@ void DentalHelper::OnContourForLeftCurveInterAction()
 
 void DentalHelper::OnContourForRightCurveInterAction()
 {
-	this->CurRightNurveInCrossView();
+	this->CutRightNurveInCrossView();
 	m_ModelRendWin->Render();
 }
 
@@ -1390,6 +1792,49 @@ void DentalHelper::OnDeleteUpProthesis()
 	m_ModelRenderer->RemoveActor(m_UpProthesisActor);
 	m_ModelRendWin->Render();
 	//还应该要删除在其他视图中的轮廓线
+	//axial
+	if (m_UpRightRenderer->GetActors()->IsItemPresent(m_CutActorForUpProthesisInAxial))
+	{
+		m_UpRightRenderer->RemoveActor(m_CutActorForUpProthesisInAxial);
+		m_UpRightRendWin->Render();
+	}
+	//coronal
+	if (m_LowerLeftRenderer->GetActors()->IsItemPresent(m_CutActorForUpProthesisInCoronal))
+	{
+		m_LowerLeftRenderer->RemoveActor(m_CutActorForUpProthesisInCoronal);
+		m_LowerLeftRendWin->Render();
+	}
+	//sagital
+	if (m_LowerRightRenderer->GetActors()->IsItemPresent(m_CutActorForUpProthesisInSagital))
+	{
+		m_LowerRightRenderer->RemoveActor(m_CutActorForUpProthesisInSagital);
+		m_LowerRightRendWin->Render();
+	}
+	
+}
+
+void DentalHelper::OnDownProthesisVisibility()
+{
+	//如果没有模型，返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_DownProthesisActor))
+	{
+		return;
+	}
+	if (m_DownProthesisActor->GetVisibility())
+	{
+		m_DownProthesisActor->VisibilityOff();
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/visibility_off_64.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.DownProthesisVisibilityButton->setIcon(icon);
+	}
+	else
+	{
+		m_DownProthesisActor->VisibilityOn();
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/visibility_on_64.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.DownProthesisVisibilityButton->setIcon(icon);
+	}
+	m_ModelRendWin->Render();
 }
 
 
@@ -1667,6 +2112,36 @@ void DentalHelper::OnImageTableCellClicked(int row, int columm)
 		//显示item的详细信息
 	}
 }
+void DentalHelper::OnLoadDownProthesis()
+{
+	QString path = QFileDialog::getOpenFileName(this, "Choose the Lower Prothesis model", nullptr, "(*.stl)");
+	if (path.isEmpty())
+	{
+		return;
+	}
+	auto stlReader = vtkSmartPointer<vtkSTLReader>::New();
+	stlReader->SetFileName(qPrintable(path));
+	stlReader->Update();
+
+	m_DownProthesisData = stlReader->GetOutput();
+	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputData(m_DownProthesisData);
+	m_DownProthesisActor->SetMapper(mapper);
+	m_DownProthesisActor->GetProperty()->SetColor(0, 1, 0);
+	m_DownProthesisActor->GetProperty()->SetAmbient(0);
+	m_DownProthesisActor->GetProperty()->SetDiffuse(1);
+	m_DownProthesisActor->GetProperty()->SetSpecular(0);
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_DownProthesisActor))
+	{
+		m_ModelRenderer->AddActor(m_DownProthesisActor);
+	}
+	m_ModelRendWin->Render();
+	this->CutDownProthesisInAxialView();
+	this->CutDownProthesisInCoronalView();
+	this->CutDownProthesisInSagitalView();
+}
+
+
 void DentalHelper::OnLoadUpProthesis()
 {
 	QString path = QFileDialog::getOpenFileName(this, "Choose the Up Prothesis model", nullptr, "(*.stl)");
@@ -1692,6 +2167,9 @@ void DentalHelper::OnLoadUpProthesis()
 	}
 	m_ModelRendWin->Render();
 
+	this->CutUpProthesisInAxialView();
+	this->CutUpProthesisInCoronalView();
+	this->CutUpProthesisInSagitalView();
 }
 
 
@@ -1868,6 +2346,41 @@ void DentalHelper::OnRemoveImage()
 	ui.ImageTabelWidget->removeRow(m_CurrentIndex);
 }
 
+void DentalHelper::OnDeleteDownProthesis()
+{
+	//如果没有模型，返回
+	if (!m_ModelRenderer->GetActors()->IsItemPresent(m_DownProthesisActor))
+	{
+		return;
+	}
+	if (QMessageBox::information(this, "Remove Up Prothesis", "Are you sure to remove the lower prothesis?", QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Cancel)
+	{
+		return;
+	}
+	m_ModelRenderer->RemoveActor(m_DownProthesisActor);
+	m_ModelRendWin->Render();
+	//还应该要删除在其他视图中的轮廓线
+
+	//axial
+	if (m_UpRightRenderer->GetActors()->IsItemPresent(m_CutActorForDownProthesisInAxial))
+	{
+		m_UpRightRenderer->RemoveActor(m_CutActorForDownProthesisInAxial);
+		m_UpRightRendWin->Render();
+	}
+	//coronal
+	if (m_LowerLeftRenderer->GetActors()->IsItemPresent(m_CutActorForDownProthesisInCoronal))
+	{
+		m_LowerLeftRenderer->RemoveActor(m_CutActorForDownProthesisInCoronal);
+		m_LowerLeftRendWin->Render();
+	}
+	//sagital
+	if (m_LowerRightRenderer->GetActors()->IsItemPresent(m_CutActorForDownProthesisInSagital))
+	{
+		m_LowerRightRenderer->RemoveActor(m_CutActorForDownProthesisInSagital);
+		m_LowerRightRendWin->Render();
+	}
+}
+
 
 
 void DentalHelper::OnDeleteLastContourNode()
@@ -1954,6 +2467,12 @@ void DentalHelper::OnUpDateLowerLeftView(int index)
 			m_CoronalViewer->Render();
 			this->UpDateCoronalLine();
 			m_LowerLeftRendWin->Render();
+
+			this->CutLeftNurveInCoronalView();
+			this->CutRightNurveInCoronalView();
+
+			this->CutUpProthesisInCoronalView();
+			this->CutDownProthesisInCoronalView();
 		}
 	}
 	else
@@ -1977,6 +2496,13 @@ void DentalHelper::OnUpDateLowerRightView(int index)
 			m_SagitalViewer->Render();
 			this->UpDateSagitalLine();
 			m_LowerRightRendWin->Render();
+
+
+			this->CutLeftNurveInSagitalView();
+			this->CutRightNurveInSagitalView();
+
+			this->CutUpProthesisInSagitalView();
+			this->CutDownProthesisInSagitalView();
 		}
 	}
 	else
@@ -2001,6 +2527,8 @@ void DentalHelper::OnUpDateUpRightView(int index)
 			this->UpDateAxialLine();
 			this->CutLeftNurveInAxialView();
 			this->CutRightNurveInAxialView();
+			this->CutUpProthesisInAxialView();
+			this->CutDownProthesisInAxialView();
 			m_UpRightRendWin->Render();
 		}
 	}

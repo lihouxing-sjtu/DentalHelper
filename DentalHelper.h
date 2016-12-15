@@ -163,15 +163,29 @@ private:
 	//切割左边神经
 	vtkSmartPointer<vtkActor> m_CutActorForLeftNurveInCross;
 	vtkSmartPointer<vtkActor> m_CutActorForLeftNurveInAxial;
-
+	vtkSmartPointer<vtkActor> m_CutActorForLeftNurveInCoronal;
+	vtkSmartPointer<vtkActor> m_CutActorForLeftNurveInSagital;
 	//切割右边神经
 	vtkSmartPointer<vtkActor> m_CutActorForRightNurveInCross;
 	vtkSmartPointer<vtkActor> m_CutActorForRightNurveInAxial;
+	vtkSmartPointer<vtkActor> m_CutActorForRightNurveInCoronal;
+	vtkSmartPointer<vtkActor> m_CutActorForRightNurveInSagital;
 
 
 	//上颌假牙模型
 	vtkSmartPointer<vtkPolyData> m_UpProthesisData;
 	vtkSmartPointer<vtkActor> m_UpProthesisActor;
+	vtkSmartPointer<vtkActor> m_CutActorForUpProthesisInAxial;
+	vtkSmartPointer<vtkActor> m_CutActorForUpProthesisInCoronal;
+	vtkSmartPointer<vtkActor> m_CutActorForUpProthesisInSagital;
+
+
+	//下颌假牙模型
+	vtkSmartPointer<vtkPolyData> m_DownProthesisData;
+	vtkSmartPointer<vtkActor> m_DownProthesisActor;
+	vtkSmartPointer<vtkActor> m_CutActorForDownProthesisInAxial;
+	vtkSmartPointer<vtkActor> m_CutActorForDownProthesisInCoronal;
+	vtkSmartPointer<vtkActor> m_CutActorForDownProthesisInSagital;
 
 	//切换axial和arch curve的action
 	QMenu* m_MenuForUpRight;
@@ -236,11 +250,37 @@ private:
 	//在cross view中切割left nurve
 	void CutLeftNurveInCrossView();
 	//在cross view中切割right nurve
-	void CurRightNurveInCrossView();
+	void CutRightNurveInCrossView();
 	//在axial view中切割left nurve
 	void CutLeftNurveInAxialView();
 	//在axial view中切割right nurve
 	void CutRightNurveInAxialView();
+	//在coronal view中切割 left nurve
+	void CutLeftNurveInCoronalView();
+	//在coronal view中切割right nurve
+	void CutRightNurveInCoronalView();
+	//在sagital view中切割left nurve
+	void CutLeftNurveInSagitalView();
+	//在sagital view中切割right nurve
+	void CutRightNurveInSagitalView();
+
+
+
+
+	//在axial view中切割up prothesis
+	void CutUpProthesisInAxialView();
+
+
+	//在coronal view中切割up prothesis
+	void CutUpProthesisInCoronalView();
+	//在sagital view中切割up prothesis
+	void CutUpProthesisInSagitalView();
+	//在axial view中切割down prothesis
+	void CutDownProthesisInAxialView();
+	//在coronal view中切割down prothesis
+	void CutDownProthesisInCoronalView();
+	//在sagital view中切割sagital prothesis
+	void CutDownProthesisInSagitalView();
 
 protected slots:
 
@@ -313,6 +353,13 @@ protected slots:
 	void OnDeleteUpProthesis();
 	//上颌假体的可见性
 	void OnUpProthesisVisibility();
-
+	//添加下颌假体模型
+	void OnLoadDownProthesis();
+	//调整下颌假体的透明度
+	void OnChangeDownProthesisOpacity(int);
+	//删除下颌假体
+	void OnDeleteDownProthesis();
+	//下颌假体的可见性
+	void OnDownProthesisVisibility();
 
 };

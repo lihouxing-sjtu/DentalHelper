@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1263</width>
+    <width>1267</width>
     <height>884</height>
    </rect>
   </property>
@@ -2204,6 +2204,9 @@ background: #eee;
 border: 1px solid #aaa;  
 border-radius: 4px;}  
 </string>
+               </property>
+               <property name="pageStep">
+                <number>1</number>
                </property>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
