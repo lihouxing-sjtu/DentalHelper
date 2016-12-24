@@ -8,6 +8,7 @@
 #include "XDicomItem.h"
 #include "qglobal.h"
 #include "QProgressWidget.h"
+#include "ImplantItem.h"
 VTK_MODULE_INIT(vtkInteractionStyle);
 VTK_MODULE_INIT(vtkRenderingFreeType);
 VTK_MODULE_INIT(vtkRenderingOpenGL2);
@@ -22,8 +23,8 @@ public:
 private:
     Ui::DentalHelperClass ui;
 	int m_CurrentIndex;//当前选中的image item
-	int m_ViewState;
-
+	int m_WorkingState;
+	int m_DrawImplantState;
 	QList<XDicomItem*> m_DicomList;//存DICOM的list
 
 	double AxialColor[3], CoronalColor[3], SagitalColor[3];
@@ -37,7 +38,11 @@ private:
 	bool isAxial;
 	bool isCoronal;
 	bool isSagital;
-
+	bool isPanaromic;
+	bool isArchCurve;
+	bool isCross;
+	bool isRotation;
+	bool isPosition;
 	//三维模型视图
 	vtkSmartPointer<vtkRenderer> m_ModelRenderer;
 	vtkSmartPointer<vtkRenderWindow> m_ModelRendWin;
@@ -72,8 +77,11 @@ private:
 
 	//三个传统视图的显示
 	vtkSmartPointer<vtkImageViewer2> m_AxialViewer;
+	vtkSmartPointer<vtkPlane> m_AxialPlane;
 	vtkSmartPointer<vtkImageViewer2> m_CoronalViewer;
+	vtkSmartPointer<vtkPlane> m_CoronalPlane;
 	vtkSmartPointer<vtkImageViewer2> m_SagitalViewer;
+	vtkSmartPointer<vtkPlane> m_SagitalPlane;
 
 	vtkSmartPointer<vtkLine> m_Axial_CoronalLine;
 	vtkSmartPointer<vtkLine> m_Axial_SagitalLine;
@@ -126,6 +134,22 @@ private:
 	vtkSmartPointer<vtkImageSlice> m_ReslicePropOfCrossInModel;
 	vtkSmartPointer<vtkImageResliceMapper> m_ResliceMapperOfCrossIn2D;
 	vtkSmartPointer<vtkImageSlice> m_ReslicePropOfCrossIn2D;
+	//rotation imageslice
+	vtkSmartPointer<vtkImageResliceMapper> m_ResliceMapperOfRotationIn2D;
+	vtkSmartPointer<vtkImageSlice> m_ReslicePropOfRotationIn2D;
+
+	vtkSmartPointer<vtkImageResliceMapper> m_ResliceMapperOfRotationIn3D;
+	vtkSmartPointer<vtkImageSlice> m_ReslicePropOfRotationIn3D;
+
+	vtkSmartPointer<vtkPlane> m_RotationPlane;
+
+	//position imageslice
+	vtkSmartPointer<vtkImageResliceMapper> m_ResliceMapperOfPositionIn2D;
+	vtkSmartPointer<vtkImageResliceMapper> m_ResliceMapperOfPositionIn3D;
+	vtkSmartPointer<vtkImageSlice> m_ReslicePropOfPositionIn2D;
+	vtkSmartPointer<vtkImageSlice> m_ReslicePropOfPositionIn3D;
+	vtkSmartPointer<vtkPlane> m_PositionPlane;
+
 	//保存contour widget 上的点，并进行插值
 	vtkSmartPointer<vtkSplineFilter> m_ContourSplineFilter;
 	//偏移的曲线及actor
@@ -165,11 +189,16 @@ private:
 	vtkSmartPointer<vtkActor> m_CutActorForLeftNurveInAxial;
 	vtkSmartPointer<vtkActor> m_CutActorForLeftNurveInCoronal;
 	vtkSmartPointer<vtkActor> m_CutActorForLeftNurveInSagital;
+	vtkSmartPointer<vtkActor> m_CutActorForLeftNurveInRotation;
+	vtkSmartPointer<vtkActor> m_CutActorForLeftNurveInPosition;
+
 	//切割右边神经
 	vtkSmartPointer<vtkActor> m_CutActorForRightNurveInCross;
 	vtkSmartPointer<vtkActor> m_CutActorForRightNurveInAxial;
 	vtkSmartPointer<vtkActor> m_CutActorForRightNurveInCoronal;
 	vtkSmartPointer<vtkActor> m_CutActorForRightNurveInSagital;
+	vtkSmartPointer<vtkActor> m_CUtActorForRightNurveInRotation;
+	vtkSmartPointer<vtkActor> m_CutActorForRightNurveInPosition;
 
 
 	//上颌假牙模型
@@ -178,7 +207,9 @@ private:
 	vtkSmartPointer<vtkActor> m_CutActorForUpProthesisInAxial;
 	vtkSmartPointer<vtkActor> m_CutActorForUpProthesisInCoronal;
 	vtkSmartPointer<vtkActor> m_CutActorForUpProthesisInSagital;
-
+	vtkSmartPointer<vtkActor> m_CutActorForUpProthesisInCross;
+	vtkSmartPointer<vtkActor> m_CutActorForUpProthesisInRotation;
+	vtkSmartPointer<vtkActor> m_CutActorForUpProthesisInPosition;
 
 	//下颌假牙模型
 	vtkSmartPointer<vtkPolyData> m_DownProthesisData;
@@ -186,12 +217,40 @@ private:
 	vtkSmartPointer<vtkActor> m_CutActorForDownProthesisInAxial;
 	vtkSmartPointer<vtkActor> m_CutActorForDownProthesisInCoronal;
 	vtkSmartPointer<vtkActor> m_CutActorForDownProthesisInSagital;
+	vtkSmartPointer<vtkActor> m_CutActorForDownProthesisInCross;
+	vtkSmartPointer<vtkActor> m_CutActorForDownProthesisInRotation;
+	vtkSmartPointer<vtkActor> m_CutActorForDownProthesisInPosition;
 
-	//切换axial和arch curve的action
+	//切换axial,arch curve和position的action
 	QMenu* m_MenuForUpRight;
 	QAction* m_Change2ArchCurve;
 	QAction* m_Change2Axial;
+	QAction* m_Change2Position;
+	//切换coronal,panaromic和rotation的action
+	QMenu* m_MenuForLowerLeft;
+	QAction* m_Change2Panaromic;
+	QAction* m_Change2Coronal;
+	QAction* m_Change2Rotation;
+	//切换cross和sagital的action
+	QMenu* m_MenuForLowerRight;
+	QAction* m_Change2Cross;
+	QAction* m_Change2Sagital;
 
+	//种植体的第一个点
+	vtkSmartPointer<vtkSphereWidget> m_FirstPointWidget;
+
+	//种植体list
+	QList<ImplantItem*> m_ImplantList;
+	//记录当前显示的种植体
+	int m_CurrentImplant;
+
+	//种植体交互widget
+	vtkSmartPointer<vtkSphereWidget> m_FirstRotateWidget;
+	vtkSmartPointer<vtkSphereWidget> m_SecondRotateWidget;
+	vtkSmartPointer<vtkSphereWidget> m_MoveWidget;
+
+	//记录move widget的前一个坐标
+	double centerOfPreviousMoveWiget[3];
 	//读取DICOM
 	void ReadImageFile(QString dir);
 
@@ -215,6 +274,13 @@ private:
 	void SetActorsVisibilityInCoronal(bool vis);
 	void SetActorsVisibilityInSagital(bool vis);
 
+	void SetActorsVisibilityInPanaromic(bool vis);
+	void SetActorsVisibilityInCross(bool vis);
+	void SetActorsVisibilityInArchCurve(bool vis);
+
+	void SetActorsVisibilityInPosition(bool vis);
+	void SetActorsVisibilityInRotation(bool vis);
+
 	//设置单个视图参数
 	void SetSingleViewer(vtkRenderer* ren, vtkImageViewer2* viewer,int sliceIndex,int mark);
 
@@ -233,7 +299,7 @@ private:
 	void SetButtonColor(QPushButton* button, double* color);
 
 	//设置相机参数，正对图像
-	void UpDateCamera(vtkRenderer* ren, double* referenceNormal, double angle);
+	void UpDateCamera(vtkRenderer* ren, double* referenceNormal, double angle,double* foculPoint=NULL);
 	//生成contour的点
 	void GenerateContourWidgetPolydata();
 	//生成cross reslice
@@ -242,6 +308,10 @@ private:
 	void GenerateOffSetSpline();
 	//生成panaromic slice
 	void GeneratePanaromicReslice();
+	//生成rotation slice
+	void GenerateRotationReslice();
+	//生成position slice
+	void GeneratePositionReslice();
 	//生成直纹面
 	void GenerateRuledSurface(vtkPoints* p1, vtkPoints* p2,vtkPolyData*);
 	
@@ -251,6 +321,10 @@ private:
 	void CutLeftNurveInCrossView();
 	//在cross view中切割right nurve
 	void CutRightNurveInCrossView();
+	//在cross view中切割 up prothesis
+	void CutUpProthesisInCrossView();
+	//在cross view中切割down prothesis
+	void CutDownProthesisInCrossView();
 	//在axial view中切割left nurve
 	void CutLeftNurveInAxialView();
 	//在axial view中切割right nurve
@@ -264,6 +338,15 @@ private:
 	//在sagital view中切割right nurve
 	void CutRightNurveInSagitalView();
 
+	//在rotation中切割左边神经
+	void CutLeftNurveInRotationView();
+	//在position 中切割左边神经
+	void CUtLeftNurveInPositionView();
+
+	//在rotation view中切割右边神经
+	void CutRightNurveInRotationView();
+	//在position view中切割右边神经
+	void CutRightNurveInPositionView();
 
 
 
@@ -275,13 +358,22 @@ private:
 	void CutUpProthesisInCoronalView();
 	//在sagital view中切割up prothesis
 	void CutUpProthesisInSagitalView();
+	//在rotation view中切割up prothesis
+	void CutUpProthesisInRotationView();
+	//在position view中切割up prothesis
+	void CutUpProthesisInPositionView();
 	//在axial view中切割down prothesis
 	void CutDownProthesisInAxialView();
 	//在coronal view中切割down prothesis
 	void CutDownProthesisInCoronalView();
 	//在sagital view中切割sagital prothesis
 	void CutDownProthesisInSagitalView();
-
+	//在rotation 中切割down prothesis
+	void CutDownProthesisInRotationView();
+	//在position view中切割down prothesis
+	void CutDownProthesisInPositionView();
+	//设置种植体交互widget的位置
+	void SetImplantInteractionWidget(double* first, double* normal,double length);
 protected slots:
 
 	//对Load Button的响应函数
@@ -345,6 +437,19 @@ protected slots:
 	void OnChange2AxialView();
 	//up right切换到arch curve
 	void OnChange2ArchCurve();
+	//up right 切换到position view
+	void OnChange2Position();
+	//lower left切换到coronal
+	void OnChange2Coronal();
+	//lower left 切换到panaromic
+	void OnChange2Panaromic();
+	//lower left切换到rotation
+	void OnChange2Rotation();
+	//lower right切换到sagital
+	void OnChange2Sagital();
+	//lower right切换到 cross
+	void OnChange2Cross();
+
 	//添加上颌假体模型
 	void OnLoadUpProthesis();
 	//调整上颌假体的透明度
@@ -361,5 +466,28 @@ protected slots:
 	void OnDeleteDownProthesis();
 	//下颌假体的可见性
 	void OnDownProthesisVisibility();
-
+	//开始放种植体
+	void OnStartDrawImplant();
+	//添加种植体
+	void OnAddImplant();
+	//在cross上选择种植点
+	void PickImplantPoint();
+	//第一个种植点交互，投影到cross平面设置投影点为其中心
+	void OnFirstPointWidgetInteraction();
+	//更新当前显示的种植体
+	void OnUpdateCurrentImplant(int);
+	//控制rotation在3D视图中的可见性
+	void OnRotationVisibilityIn3DView();
+	//控制position在3D视图中的可见性
+	void OnPositionVisibilityIn3DView();
+	//当种植体参数改变的时候，切割
+	void OnImplantChanged(ImplantItem*);
+	//删除种植体
+	void OnDeleteImplant(ImplantItem*);
+	//种植体第一个widget的交互函数
+	void OnFirstRotateWidgetInteraction();
+	//种植体的第二个widget的交互函数
+	void OnSecondRotateWidgetInteraction();
+	//种植体的移动widget交互函数
+	void OnMoveWidgetInteraction();
 };

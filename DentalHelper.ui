@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1267</width>
+    <width>1423</width>
     <height>884</height>
    </rect>
   </property>
@@ -50,7 +50,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>4</number>
       </property>
       <property name="iconSize">
        <size>
@@ -684,11 +684,30 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
         <property name="bottomMargin">
          <number>0</number>
         </property>
-        <property name="spacing">
+        <property name="horizontalSpacing">
+         <number>10</number>
+        </property>
+        <property name="verticalSpacing">
          <number>0</number>
         </property>
         <item row="0" column="0">
          <widget class="QGroupBox" name="setting">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <family>微软雅黑</family>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(85, 170, 255);</string>
+          </property>
           <property name="title">
            <string>Setting</string>
           </property>
@@ -807,7 +826,9 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
                   </font>
                  </property>
                  <property name="styleSheet">
-                  <string notr="true">border:2px solid gray;border-radius:10px;padding:2px 4px;</string>
+                  <string notr="true">QToolButton{border:2px solid gray;border-radius:10px;padding:2px 4px;}
+
+QToolButton:pressed{background-color: qconicalgradient(cx:1, cy:0, angle:176.3, stop:0.202247 rgba(255, 127, 148, 255), stop:1 rgba(255, 255, 255, 255));}</string>
                  </property>
                  <property name="text">
                   <string>Delete Last Node</string>
@@ -869,6 +890,13 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
                   <layout class="QVBoxLayout" name="verticalLayout_3">
                    <item>
                     <widget class="QRadioButton" name="Panaromic2DRadioButton">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <weight>75</weight>
+                       <bold>true</bold>
+                      </font>
+                     </property>
                      <property name="text">
                       <string>2D</string>
                      </property>
@@ -882,6 +910,13 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
                    </item>
                    <item>
                     <widget class="QRadioButton" name="Panaromic3DRadioButton">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <weight>75</weight>
+                       <bold>true</bold>
+                      </font>
+                     </property>
                      <property name="text">
                       <string>3D</string>
                      </property>
@@ -900,6 +935,22 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
         </item>
         <item row="0" column="1">
          <widget class="QGroupBox" name="Nurve">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <family>微软雅黑</family>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(255, 170, 127);</string>
+          </property>
           <property name="title">
            <string>Nurve</string>
           </property>
@@ -1017,7 +1068,9 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
               </font>
              </property>
              <property name="styleSheet">
-              <string notr="true">border:2px solid gray;border-radius:10px;padding:2px 4px;</string>
+              <string notr="true">QToolButton{border:2px solid gray;border-radius:10px;padding:2px 4px;}
+
+QToolButton:pressed{background-color: qconicalgradient(cx:1, cy:0, angle:176.3, stop:0.202247 rgba(255, 127, 148, 255), stop:1 rgba(255, 255, 255, 255));}</string>
              </property>
              <property name="text">
               <string>Delete Last Point</string>
@@ -1053,7 +1106,9 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
               </font>
              </property>
              <property name="styleSheet">
-              <string notr="true">border:2px solid gray;border-radius:10px;padding:2px 4px;</string>
+              <string notr="true">QToolButton{border:2px solid gray;border-radius:10px;padding:2px 4px;}
+
+QToolButton:pressed{background-color: qconicalgradient(cx:1, cy:0, angle:176.3, stop:0.202247 rgba(255, 127, 148, 255), stop:1 rgba(255, 255, 255, 255));}</string>
              </property>
              <property name="text">
               <string>Delete Last Point</string>
@@ -1083,6 +1138,16 @@ font: 75 9pt &quot;微软雅黑&quot;;</string>
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <family>微软雅黑</family>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(85, 170, 0);</string>
           </property>
           <property name="title">
            <string>Prothesis Model</string>
@@ -1482,7 +1547,7 @@ border-radius: 4px;}
          </widget>
         </item>
         <item row="0" column="3">
-         <widget class="QPushButton" name="pushButton_2">
+         <widget class="QPushButton" name="StartDrawImplantButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -1526,24 +1591,160 @@ border-radius: 4px;}
        <attribute name="title">
         <string>Implant Setting</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout_11">
+       <layout class="QGridLayout" name="gridLayout_18">
         <property name="leftMargin">
-         <number>0</number>
+         <number>1</number>
         </property>
         <property name="topMargin">
-         <number>2</number>
+         <number>1</number>
         </property>
         <property name="rightMargin">
-         <number>0</number>
+         <number>1</number>
         </property>
         <property name="bottomMargin">
-         <number>0</number>
+         <number>1</number>
         </property>
         <property name="spacing">
-         <number>0</number>
+         <number>1</number>
         </property>
         <item row="0" column="0">
+         <widget class="QWidget" name="widget_3" native="true">
+          <property name="maximumSize">
+           <size>
+            <width>150</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(85, 255, 127);
+
+</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_11">
+           <item row="1" column="0">
+            <layout class="QHBoxLayout" name="horizontalLayout_17">
+             <item>
+              <widget class="QLabel" name="label_7">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Diameter:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="ImplantDiameterSpinBox">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="value">
+                <double>4.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="2" column="0">
+            <layout class="QHBoxLayout" name="horizontalLayout_18">
+             <item>
+              <widget class="QLabel" name="label_8">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Length:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="ImplantLengthSpinBox">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="value">
+                <double>10.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="0" column="0">
+            <widget class="QToolButton" name="AddImplantButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>Add</string>
+             </property>
+             <property name="icon">
+              <iconset resource="DentalHelper.qrc">
+               <normaloff>:/DentalHelper/Resources/bigimplant.png</normaloff>:/DentalHelper/Resources/bigimplant.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>64</width>
+               <height>64</height>
+              </size>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="toolButtonStyle">
+              <enum>Qt::ToolButtonTextBesideIcon</enum>
+             </property>
+             <property name="autoRaise">
+              <bool>false</bool>
+             </property>
+             <property name="arrowType">
+              <enum>Qt::NoArrow</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="0" column="1">
          <widget class="QTabWidget" name="tabWidget_2">
+          <property name="font">
+           <font>
+            <family>微软雅黑</family>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(255, 255, 127);</string>
+          </property>
           <property name="tabShape">
            <enum>QTabWidget::Triangular</enum>
           </property>
@@ -1558,39 +1759,133 @@ border-radius: 4px;}
           </property>
           <widget class="QWidget" name="tab_8">
            <attribute name="title">
-            <string>Tab 1                                      </string>
+            <string>Implant    List</string>
            </attribute>
-           <widget class="QPushButton" name="pushButton_3">
-            <property name="geometry">
-             <rect>
-              <x>-10</x>
-              <y>-40</y>
-              <width>141</width>
-              <height>121</height>
-             </rect>
+           <layout class="QGridLayout" name="gridLayout_20">
+            <property name="leftMargin">
+             <number>0</number>
             </property>
-            <property name="text">
-             <string/>
+            <property name="topMargin">
+             <number>0</number>
             </property>
-            <property name="icon">
-             <iconset resource="DentalHelper.qrc">
-              <normaloff>:/DentalHelper/Resources/back.png</normaloff>:/DentalHelper/Resources/back.png</iconset>
+            <property name="rightMargin">
+             <number>0</number>
             </property>
-            <property name="iconSize">
-             <size>
-              <width>60</width>
-              <height>60</height>
-             </size>
+            <property name="bottomMargin">
+             <number>0</number>
             </property>
-            <property name="flat">
-             <bool>true</bool>
+            <property name="spacing">
+             <number>0</number>
             </property>
-           </widget>
+            <item row="0" column="0">
+             <widget class="QTableWidget" name="ImplantTableWidget">
+              <property name="styleSheet">
+               <string notr="true">QTableWidget::item{border:3px solid ;}</string>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::Box</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <property name="lineWidth">
+               <number>0</number>
+              </property>
+              <property name="midLineWidth">
+               <number>5</number>
+              </property>
+              <property name="gridStyle">
+               <enum>Qt::SolidLine</enum>
+              </property>
+              <property name="sortingEnabled">
+               <bool>false</bool>
+              </property>
+              <property name="wordWrap">
+               <bool>false</bool>
+              </property>
+              <property name="cornerButtonEnabled">
+               <bool>true</bool>
+              </property>
+              <property name="rowCount">
+               <number>0</number>
+              </property>
+              <property name="columnCount">
+               <number>0</number>
+              </property>
+              <attribute name="horizontalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="horizontalHeaderCascadingSectionResizes">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="horizontalHeaderDefaultSectionSize">
+               <number>150</number>
+              </attribute>
+              <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="horizontalHeaderStretchLastSection">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="verticalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="verticalHeaderDefaultSectionSize">
+               <number>70</number>
+              </attribute>
+              <attribute name="verticalHeaderStretchLastSection">
+               <bool>true</bool>
+              </attribute>
+             </widget>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="tab_9">
            <attribute name="title">
-            <string>Tab 2</string>
+            <string>Base List</string>
            </attribute>
+           <layout class="QGridLayout" name="gridLayout_19">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <item row="4" column="0">
+             <widget class="QTableWidget" name="BaseTableWidget">
+              <property name="styleSheet">
+               <string notr="true">QTableWidget::item{border:3px solid ;}</string>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::Box</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <property name="lineWidth">
+               <number>0</number>
+              </property>
+              <property name="midLineWidth">
+               <number>5</number>
+              </property>
+              <attribute name="horizontalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="verticalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </widget>
         </item>
@@ -1756,6 +2051,31 @@ border-radius: 4px;}
         </item>
         <item row="0" column="1">
          <layout class="QGridLayout" name="gridLayout_15">
+          <item row="1" column="1">
+           <widget class="QPushButton" name="ChangeLowerRightButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="font">
+             <font>
+              <family>微软雅黑</family>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">border:2px solid gray;border-radius:10px;padding:2px 4px;
+
+</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QWidget" name="widget_2" native="true">
             <layout class="QGridLayout" name="gridLayout_10">
@@ -1826,31 +2146,6 @@ border-radius: 4px;}
             </layout>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QPushButton" name="ChangeUpRightViewButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="font">
-             <font>
-              <family>微软雅黑</family>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">border:2px solid gray;border-radius:10px;padding:2px 4px;
-
-</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <widget class="QPushButton" name="ChangeLowerLeftButton">
             <property name="sizePolicy">
@@ -1876,8 +2171,8 @@ border-radius: 4px;}
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="ChangeLowerRightButton">
+          <item row="0" column="1">
+           <widget class="QPushButton" name="ChangeUpRightViewButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -1903,7 +2198,7 @@ border-radius: 4px;}
           </item>
          </layout>
         </item>
-        <item row="0" column="2">
+        <item row="0" column="3">
          <spacer name="horizontalSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -1915,6 +2210,109 @@ border-radius: 4px;}
            </size>
           </property>
          </spacer>
+        </item>
+        <item row="0" column="2">
+         <widget class="QWidget" name="widget_4" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_21">
+           <property name="leftMargin">
+            <number>2</number>
+           </property>
+           <property name="topMargin">
+            <number>2</number>
+           </property>
+           <property name="rightMargin">
+            <number>2</number>
+           </property>
+           <property name="bottomMargin">
+            <number>2</number>
+           </property>
+           <property name="horizontalSpacing">
+            <number>2</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QToolButton" name="RotationIn3DVisibilityButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">border:2px solid gray;border-radius:10px;padding:2px 4px;
+
+</string>
+             </property>
+             <property name="text">
+              <string>Rotation Visibility</string>
+             </property>
+             <property name="icon">
+              <iconset resource="DentalHelper.qrc">
+               <normaloff>:/DentalHelper/Resources/visibility_on_64.png</normaloff>:/DentalHelper/Resources/visibility_on_64.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>48</width>
+               <height>48</height>
+              </size>
+             </property>
+             <property name="toolButtonStyle">
+              <enum>Qt::ToolButtonTextBesideIcon</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QToolButton" name="PositionIn3DVisibilityButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">border:2px solid gray;border-radius:10px;padding:2px 4px;
+
+</string>
+             </property>
+             <property name="text">
+              <string>Position Visibility</string>
+             </property>
+             <property name="icon">
+              <iconset resource="DentalHelper.qrc">
+               <normaloff>:/DentalHelper/Resources/visibility_on_64.png</normaloff>:/DentalHelper/Resources/visibility_on_64.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>48</width>
+               <height>48</height>
+              </size>
+             </property>
+             <property name="toolButtonStyle">
+              <enum>Qt::ToolButtonTextBesideIcon</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </item>
        </layout>
       </widget>
