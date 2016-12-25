@@ -251,6 +251,11 @@ private:
 
 	//记录move widget的前一个坐标
 	double centerOfPreviousMoveWiget[3];
+	//记录当前计算平行度的标准种植体
+	int m_CurrentParallel;
+
+	//保存工程的路径
+	QString m_SaveProjectPath;
 	//读取DICOM
 	void ReadImageFile(QString dir);
 
@@ -374,6 +379,23 @@ private:
 	void CutDownProthesisInPositionView();
 	//设置种植体交互widget的位置
 	void SetImplantInteractionWidget(double* first, double* normal,double length);
+	//计算平行度函数
+	void CalculateParallelAngle();
+	//保存图像
+	void SaveImages(QString filepath);
+	void SaveDicomInformation(QDataStream& out, XDicomItem &data);
+	//保存事前的规划
+	void SavePrePlanning(QString filepath);
+	//保存种植体信息
+	void SaveImplants(QString filepath);
+
+	//打开图像
+	void OpenImages(QString filepath);
+	void OpenDicomInformation(QDataStream& d, XDicomItem& data);
+	void AddImageItem(XDicomItem* item);
+	//打开 setting
+	void OpenSetting(QString filepath);
+	void GenerateContourInitialData(vtkPoints* points, vtkPolyData* initialData);
 protected slots:
 
 	//对Load Button的响应函数
@@ -490,4 +512,10 @@ protected slots:
 	void OnSecondRotateWidgetInteraction();
 	//种植体的移动widget交互函数
 	void OnMoveWidgetInteraction();
+	//改变标准种植体时的响应函数
+	void OnParallelRadioButton(ImplantItem*);
+	//保存工程
+	void OnSaveProject();
+	//打开工程
+	void OnOpenProject();
 };

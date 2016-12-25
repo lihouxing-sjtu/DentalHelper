@@ -25,6 +25,8 @@ DentalHelper::DentalHelper(QWidget *parent)
 	m_DrawImplantState = DrawImplantState::none;
 	m_CurrentIndex = -1;
 	m_CurrentImplant = -1;
+	m_CurrentParallel = -1;
+
 	isShowUpLeftView = true;
 	isShowLowerLeftView = true;
 	isShowUpRightView = true;
@@ -253,6 +255,9 @@ DentalHelper::DentalHelper(QWidget *parent)
 	m_FirstPointWidget->GetSphereProperty()->SetColor(1, 0, 0);
 	m_FirstPointWidget->ScaleOff();
 
+
+	m_SaveProjectPath = "";
+
 	connect(ui.LoadDicomButton, SIGNAL(clicked()), this, SLOT(OnReadDICOM()));
 	connect(ui.ImageTabelWidget, SIGNAL(cellClicked(int, int)), this, SLOT(OnImageTableCellClicked(int, int)));
 	connect(ui.PreviewImageButton, SIGNAL(clicked()), this, SLOT(OnPreviewData()));
@@ -309,12 +314,57 @@ DentalHelper::DentalHelper(QWidget *parent)
 
 	connect(ui.StartDrawImplantButton, SIGNAL(clicked()), this, SLOT(OnStartDrawImplant()));
 	connect(ui.AddImplantButton, SIGNAL(clicked()), this, SLOT(OnAddImplant()));
+
+	connect(ui.SaveProjectButton, SIGNAL(clicked()), this, SLOT(OnSaveProject()));
+	connect(ui.OpenProjectButton, SIGNAL(clicked()), this, SLOT(OnOpenProject()));
 }
 
 DentalHelper::~DentalHelper()
 {
 	delete m_ProgressDialog;
 }
+void DentalHelper::AddImageItem(XDicomItem* item)
+{
+	m_DicomList.append(item);
+	int numOfItem = m_DicomList.size();
+	ui.ImageTabelWidget->setRowCount(numOfItem - 1);
+	ui.ImageTabelWidget->insertRow(numOfItem - 1);
+
+	for each(QString text in item->GetMainList())
+	{
+		int indexOfItem = item->GetMainList().indexOf(text);
+		QTableWidgetItem *itemText = new QTableWidgetItem(text);
+		itemText->setTextAlignment(Qt::AlignCenter);
+		ui.ImageTabelWidget->setItem(numOfItem - 1, indexOfItem, itemText);
+	}
+	QTableWidgetItem *LastText = new QTableWidgetItem("...");
+	LastText->setTextAlignment(Qt::AlignCenter);
+	ui.ImageTabelWidget->setItem(numOfItem - 1, item->GetMainList().size(), LastText);
+}
+
+
+void DentalHelper::CalculateParallelAngle()
+{
+	if (m_CurrentParallel==-1)
+	{
+		return;
+	}
+	double standardNormal[3];
+	for (int i=0;i<3;i++)
+	{
+		standardNormal[i] = m_ImplantList.at(m_CurrentParallel)->m_NormalOfTube[i];
+	}
+	for each (ImplantItem* var in m_ImplantList)
+	{
+		double angle = vtkMath::DegreesFromRadians(vtkMath::AngleBetweenVectors(var->m_NormalOfTube, standardNormal));
+		var->SetParallelAngle(angle);
+		var->SetParallelRadioButton(false);
+	}
+	m_ImplantList.at(m_CurrentParallel)->SetParallelRadioButton(true);
+
+}
+
+
 void DentalHelper::CutDownProthesisInAxialView()
 {
 	//如果没有模型，返回
@@ -1318,6 +1368,22 @@ void DentalHelper::DrawSagitalLine()
 	m_LowerLeftRendWin->Render();
 	
 }
+void DentalHelper::GenerateContourInitialData(vtkPoints* points, vtkPolyData* initialData)
+{
+	auto idlist = vtkSmartPointer<vtkIdList>::New();
+	idlist->Initialize();
+	auto cellArrary = vtkSmartPointer<vtkCellArray>::New();
+	cellArrary->Initialize();
+	for (int i = 0; i < points->GetNumberOfPoints(); i++)
+	{
+		idlist->InsertNextId(i);
+	}
+	cellArrary->InsertNextCell(idlist);
+	initialData->SetPoints(points);
+	initialData->SetLines(cellArrary);
+}
+
+
 void DentalHelper::GenerateContourWidgetPolydata()
 {
 	QSettings widgetPoints;
@@ -2009,6 +2075,12 @@ void DentalHelper::InitializeView()
 }
 void DentalHelper::OnAddImplant()
 {
+	if (m_WorkingState!=WorkState::drawimplant)
+	{		
+		ui.AddImplantButton->setChecked(false);
+		return;
+
+	}
 	if (ui.AddImplantButton->isChecked())
 	{
 		m_EventQtConnector->Connect(m_LowerRightInteractor, vtkCommand::RightButtonPressEvent, this, SLOT(PickImplantPoint()));
@@ -2805,7 +2877,8 @@ void DentalHelper::OnFirstRotateWidgetInteraction()
 	}
 	
 	m_ImplantList.at(m_CurrentImplant)->UpDateImplant();
-
+	//计算平行度
+	this->CalculateParallelAngle();
 	//this->GeneratePositionReslice();
 }
 
@@ -3029,9 +3102,42 @@ void DentalHelper::OnMoveWidgetInteraction()
 	}
 	m_ImplantList.at(m_CurrentImplant)->UpDateImplant();
 
-
+	//计算平行度
+	this->CalculateParallelAngle();
 	//this->GeneratePositionReslice();
 }
+void DentalHelper::OnOpenProject()
+{
+	QString fileName = QFileDialog::getOpenFileName(this,
+		tr("Open Project File"), "",
+		tr("*.lx"));
+
+	if (fileName.isEmpty())
+		return;
+	m_SaveProjectPath = fileName.left(fileName.length() - 3);
+	QFile file(fileName);
+	if (!file.open(QIODevice::ReadOnly))
+	{
+		QMessageBox::information(this, tr("Unable to open file"),
+			file.errorString());
+		return;
+	}
+	QDataStream in(&file);
+	in.setVersion(QDataStream::Qt_5_7);
+	in >> m_WorkingState;
+	if (m_WorkingState == WorkState::ImageLoading)
+	{
+		this->OpenImages(m_SaveProjectPath);
+	}
+	if (m_WorkingState==WorkState::preplanning)
+	{
+		this->OpenImages(m_SaveProjectPath);
+		this->OnPreviewData();
+		this->OnPreplanSetting();
+		this->OpenSetting(m_SaveProjectPath);
+	}
+}
+
 
 
 void DentalHelper::OnPanaromicInModelVisibility()
@@ -3055,6 +3161,13 @@ void DentalHelper::OnPanaromicInModelVisibility()
 		ui.PanaromicInModelVisivilityButton->setIcon(icon);
 	}
 	m_ModelRendWin->Render();
+}
+
+void DentalHelper::OnParallelRadioButton(ImplantItem* item)
+{
+	int indexOfItem = m_ImplantList.indexOf(item);
+	m_CurrentParallel = indexOfItem;
+	this->CalculateParallelAngle();
 }
 
 
@@ -3135,7 +3248,7 @@ void DentalHelper::OnPreplanSetting()
 	}
 	ui.tabWidget->setCurrentIndex(1);//显示规划菜单栏
 	this->SetViewModel2Preplan();
-
+	ui.ImageNextButton->setDisabled(true);
 }
 
 
@@ -3256,12 +3369,18 @@ void DentalHelper::OnDeleteImplant(ImplantItem* item)
 	m_ImplantList.removeAt(removedIndex);
 	ui.ImplantTableWidget->removeColumn(removedIndex);
 	ui.BaseTableWidget->removeColumn(removedIndex);
+	ui.ParallelTableWidget->removeColumn(removedIndex);
 	for each (ImplantItem* var in m_ImplantList)
 	{
 		int newIndex = m_ImplantList.indexOf(var);
 		var->SetIndex(newIndex+1);
 	}
-
+	m_CurrentParallel = m_ImplantList.size() - 1;
+	if (m_CurrentParallel>-1)
+	{
+		m_ImplantList.at(m_CurrentParallel)->SetParallelRadioButton(true);
+		this->CalculateParallelAngle();
+	}
 
 	//判断是否是当前的种植体
 	if (m_CurrentImplant==removedIndex)
@@ -3286,6 +3405,13 @@ void DentalHelper::OnDeleteImplant(ImplantItem* item)
 			m_MoveWidget->Off();
 			m_LowerLeftRendWin->Render();
 		}
+	}
+	else if (m_CurrentImplant>removedIndex)
+	{
+		this->OnUpdateCurrentImplant(m_CurrentImplant);
+		this->OnUpDateLowerLeftView(ui.LowerLeftSlider->value());
+		this->OnUpDateLowerRightView(ui.LowerRightSlider->value());
+		this->OnUpDateUpRightView(ui.UpRightSlider->value());
 	}
 
 }
@@ -3330,6 +3456,50 @@ void DentalHelper::OnRotationVisibilityIn3DView()
 		m_ModelRendWin->Render();
 	}
 }
+void DentalHelper::OnSaveProject()
+{
+	if (m_SaveProjectPath.isEmpty())
+	{
+		m_SaveProjectPath = QFileDialog::getSaveFileName(this, "Save Project", 0, "*.lx");
+	}
+	if (m_SaveProjectPath.isEmpty())
+	{
+		return;
+	}
+	m_SaveProjectPath = m_SaveProjectPath.left(m_SaveProjectPath.length() - 3);
+	QString fileName = m_SaveProjectPath + ".lx";
+	QFile file(fileName);
+	if (!file.open(QIODevice::WriteOnly))
+	{
+		QMessageBox::information(this, tr("Unable to open file"),
+			file.errorString());
+		return;
+	}
+	QDataStream out(&file);
+	out.setVersion(QDataStream::Qt_5_7);
+
+	//输出当前状态
+	out << m_WorkingState;
+	//如果还没有开始规划
+	if (m_WorkingState==WorkState::ImageLoading)
+	{
+		this->SaveImages(m_SaveProjectPath);
+	}
+	//如果开始规划了
+	if (m_WorkingState==WorkState::preplanning)
+	{
+		this->SaveImages(m_SaveProjectPath);
+		this->SavePrePlanning(m_SaveProjectPath);
+	}
+	if (m_WorkingState==WorkState::drawimplant)
+	{
+		this->SaveImages(m_SaveProjectPath);
+		this->SavePrePlanning(m_SaveProjectPath);
+		this->SaveImplants(m_SaveProjectPath);
+	}
+	QMessageBox::information(this, "Save Project", "Done!");
+}
+
 
 void DentalHelper::OnSecondRotateWidgetInteraction()
 {
@@ -3355,6 +3525,8 @@ void DentalHelper::OnSecondRotateWidgetInteraction()
 
 	m_ImplantList.at(m_CurrentImplant)->UpDateImplant();
 
+	//计算平行度
+	this->CalculateParallelAngle();
 	//this->GeneratePositionReslice();
 }
 
@@ -3427,7 +3599,7 @@ void DentalHelper::OnStartDrawImplant()
 	ui.tabWidget->setCurrentIndex(2);//显示放种植体菜单栏
 
 	m_WorkingState = WorkState::drawimplant;
-
+	ui.StartDrawImplantButton->setDisabled(true);
 }
 void DentalHelper::OnUpdateCurrentImplant(int index)
 {
@@ -3741,6 +3913,264 @@ void DentalHelper::OnUpRightViewButton()
 	}
 	this->SetSuitableLayout();
 }
+void DentalHelper::OpenDicomInformation(QDataStream& d, XDicomItem& data)
+{
+	d >> data.patientName >> data.patientGender >> data.patientAge >> data.SerialNum >> data.patientID >> data.date >> data.spacingX >> data.spacingY >> data.spacingZ >> data.manufacturer >> data.hospital;
+
+}
+
+
+void DentalHelper::OpenImages(QString filepath)
+{
+	QString fileName = filepath + ".manager";
+	QFile file(fileName);
+	if (!file.open(QIODevice::ReadOnly))
+	{
+		QMessageBox::information(this, tr("Unable to open file"),
+			file.errorString());
+		return;
+	}
+	QDataStream in(&file);
+	in.setVersion(QDataStream::Qt_5_7);
+	int numOfitem;
+	in >> numOfitem;
+	in >> m_CurrentIndex;
+	for (int i = 0; i < numOfitem; i++)
+	{
+		XDicomItem *item = new XDicomItem(0);
+		this->OpenDicomInformation(in, *item);
+		//read image
+		QString temp;
+		QString vtiName = filepath + "_" + temp.setNum(i);
+		auto imageReader = vtkSmartPointer<vtkXMLImageDataReader>::New();
+		imageReader->SetFileName(qPrintable(vtiName.append(".vti")));
+		imageReader->Update();
+		item->SetImageData(imageReader->GetOutput());
+		item->BuildTagList();
+		this->AddImageItem(item);
+	}
+
+}
+
+void DentalHelper::OpenSetting(QString filepath)
+{
+	QString fileName = filepath + ".setting";
+	QFile file(fileName);
+	if (!file.open(QIODevice::ReadOnly))
+	{
+		QMessageBox::information(this, tr("Unable to open file"),
+			file.errorString());
+		return;
+	}
+	QDataStream in(&file);
+	in.setVersion(QDataStream::Qt_5_7);
+	double centerOfPlane[3];
+	double normalOfPlane[3];
+	for (int i = 0; i < 3; i++)
+	{
+		in >> centerOfPlane[i];
+		in >> normalOfPlane[i];
+	}
+	m_PlaneWidgetForArchCurve->SetCenter(centerOfPlane);
+	m_PlaneWidgetForArchCurve->SetNormal(normalOfPlane);
+	this->OnPlaneWidgetForArchCurveInteraction();
+	//读取arch curve
+	auto contourPointsForArchCurve= vtkSmartPointer<vtkPoints>::New();
+	contourPointsForArchCurve->Initialize();
+	int numOfPointsFforArchCurve;
+	in >> numOfPointsFforArchCurve;
+	for (int i = 0; i < numOfPointsFforArchCurve; i++)
+	{
+		double tempPoint[3];
+		for (int j = 0; j < 3; j++)
+		{
+			in >> tempPoint[j];
+		}
+		contourPointsForArchCurve->InsertNextPoint(tempPoint);
+	}
+	auto initialDataForArchCurve = vtkSmartPointer<vtkPolyData>::New();
+	this->GenerateContourInitialData(contourPointsForArchCurve, initialDataForArchCurve);
+	m_ContourWidgetForArchCurve->Initialize(initialDataForArchCurve);
+	this->OnContourWidgetForArchCurveInteraction();
+	//读取左边神经
+	bool isLeftNurveExist;
+	in >> isLeftNurveExist;
+	if (isLeftNurveExist)
+	{
+		auto contourPointsOfLeftNurve = vtkSmartPointer<vtkPoints>::New();
+		contourPointsOfLeftNurve->Initialize();
+		int numOfPointsForLeftNurve; 
+		in>> numOfPointsForLeftNurve;
+		for (int i = 0; i < numOfPointsForLeftNurve; i++)
+		{
+			double tempPoints[3];
+			for (int j = 0; j < 3; j++)
+			{
+				in >>tempPoints[j];
+			}
+			contourPointsOfLeftNurve->InsertNextPoint(tempPoints);
+		}
+		auto initialDataForLeftNurve = vtkSmartPointer<vtkPolyData>::New();
+		this->GenerateContourInitialData(contourPointsOfLeftNurve, initialDataForLeftNurve);
+		ui.DrawLeftNurveButton->setChecked(true);
+		ui.Panaromic3DRadioButton->setChecked(true);
+		ui.Panaromic2DRadioButton->setChecked(false);
+		this->OnChangePanaromicInteractionStyle();
+		this->OnDrawLeftNurve();
+		m_ContourForLeftNurve->Initialize(initialDataForLeftNurve);
+		this->OnContourForLeftCurveInterAction();
+		m_ContourForLeftNurve->Off();
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/Draw.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.DrawLeftNurveButton->setIcon(icon);
+		ui.DrawLeftNurveButton->setChecked(false);
+		//画右边神经的按钮禁用
+		ui.DrawRightNurveButton->setDisabled(false);
+		ui.DeleteLastRightNurvePointButton->setDisabled(false);
+		ui.LowerLeftQvtkWidget->setCursor(Qt::ArrowCursor);
+		m_LowerLeftRenderer->GetRenderWindow()->Render();
+	}
+	//读取右边神经
+	bool isRightNurveExist;
+	in >> isRightNurveExist;
+	if (isRightNurveExist)
+	{
+		auto contourPointsOfRightNurve = vtkSmartPointer<vtkPoints>::New();
+		contourPointsOfRightNurve->Initialize();
+		int numOfPointsForLeftNurve;
+		in >> numOfPointsForLeftNurve;
+		for (int i = 0; i < numOfPointsForLeftNurve; i++)
+		{
+			double tempPoints[3];
+			for (int j = 0; j < 3; j++)
+			{
+				in >> tempPoints[j];
+			}
+			contourPointsOfRightNurve->InsertNextPoint(tempPoints);
+		}
+		auto initialDataForRightNurve = vtkSmartPointer<vtkPolyData>::New();
+		this->GenerateContourInitialData(contourPointsOfRightNurve, initialDataForRightNurve);
+		ui.DrawRightNurveButton->setChecked(true);
+		ui.Panaromic3DRadioButton->setChecked(true);
+		ui.Panaromic2DRadioButton->setChecked(false);
+		this->OnChangePanaromicInteractionStyle();
+		this->OnDrawRightNurve();
+		m_ContourForRightNurve->EnabledOn();
+		m_ContourForRightNurve->Initialize(initialDataForRightNurve);
+		this->OnContourForRightCurveInterAction();
+		m_ContourForRightNurve->Off();
+		QIcon icon;
+		icon.addFile(QStringLiteral(":/DentalHelper/Resources/Draw.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui.DrawRightNurveButton->setIcon(icon);
+		ui.DrawRightNurveButton->setChecked(false);
+		//画左边神经的按钮禁用
+		ui.DrawLeftNurveButton->setDisabled(false);
+		ui.DeleteLastLeftNurvePointButton->setDisabled(false);
+		ui.LowerLeftQvtkWidget->setCursor(Qt::ArrowCursor);
+		m_LowerLeftRenderer->GetRenderWindow()->Render();
+	}
+	//读取上颌模型
+	bool isUpProthesisExist;
+	in >> isUpProthesisExist;
+	if (isUpProthesisExist)
+	{
+		QString temp = "UpProthesis";
+		QString stlName = fileName + "_" + temp;
+		auto stlReader = vtkSmartPointer<vtkSTLReader>::New();
+		stlReader->SetFileName(qPrintable(stlName));
+		stlReader->Update();
+
+		m_UpProthesisData = stlReader->GetOutput();
+		auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+		mapper->SetInputData(m_UpProthesisData);
+		m_UpProthesisActor->SetMapper(mapper);
+		m_UpProthesisActor->GetProperty()->SetColor(0, 1, 0);
+		m_UpProthesisActor->GetProperty()->SetAmbient(0);
+		m_UpProthesisActor->GetProperty()->SetDiffuse(1);
+		m_UpProthesisActor->GetProperty()->SetSpecular(0);
+		if (!m_ModelRenderer->GetActors()->IsItemPresent(m_UpProthesisActor))
+		{
+			m_ModelRenderer->AddActor(m_UpProthesisActor);
+		}
+		m_ModelRendWin->Render();
+		if (isAxial)
+		{
+			this->CutUpProthesisInAxialView();
+		}
+		if (isCoronal)
+		{
+			this->CutUpProthesisInCoronalView();
+		}
+		if (isSagital)
+		{
+			this->CutUpProthesisInSagitalView();
+		}
+		if (isPosition)
+		{
+			this->CutUpProthesisInPositionView();
+		}
+		if (isRotation)
+		{
+			this->CutUpProthesisInRotationView();
+		}
+		if (isCross)
+		{
+			this->CutUpProthesisInCrossView();
+		}
+	}
+	//读取下颌模型
+	bool isLowerProthesisExist;
+	in >> isLowerProthesisExist;
+	if (isLowerProthesisExist)
+	{
+		QString temp = "LowerProthesis";
+		QString stlName = fileName + "_" + temp;
+
+		auto stlReader = vtkSmartPointer<vtkSTLReader>::New();
+		stlReader->SetFileName(qPrintable(stlName));
+		stlReader->Update();
+
+		m_DownProthesisData = stlReader->GetOutput();
+		auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+		mapper->SetInputData(m_DownProthesisData);
+		m_DownProthesisActor->SetMapper(mapper);
+		m_DownProthesisActor->GetProperty()->SetColor(0, 1, 0);
+		m_DownProthesisActor->GetProperty()->SetAmbient(0);
+		m_DownProthesisActor->GetProperty()->SetDiffuse(1);
+		m_DownProthesisActor->GetProperty()->SetSpecular(0);
+		if (!m_ModelRenderer->GetActors()->IsItemPresent(m_DownProthesisActor))
+		{
+			m_ModelRenderer->AddActor(m_DownProthesisActor);
+		}
+		m_ModelRendWin->Render();
+		if (isAxial)
+		{
+			this->CutDownProthesisInAxialView();
+		}
+		if (isCoronal)
+		{
+			this->CutDownProthesisInCoronalView();
+		}
+		if (isSagital)
+		{
+			this->CutDownProthesisInSagitalView();
+		}
+		if (isRotation)
+		{
+			this->CutDownProthesisInRotationView();
+		}
+		if (isPosition)
+		{
+			this->CutDownProthesisInPositionView();
+		}
+		if (isCross)
+		{
+			this->CutDownProthesisInCrossView();
+		}
+	}
+}
+
+
 void DentalHelper::PickImplantPoint()
 {
 	double screenPosition[3];
@@ -3778,13 +4208,15 @@ void DentalHelper::PickImplantPoint()
 		item->SetIndex(numOfImplant);
 	//更新当前显示的种植体
 		m_CurrentImplant = numOfImplant - 1;	
+		m_CurrentParallel= numOfImplant - 1;
+		this->CalculateParallelAngle();
 
 		this->OnUpdateCurrentImplant(m_CurrentImplant + 1);
 
 		connect(item, SIGNAL(radioButtonChecked(int)), this, SLOT(OnUpdateCurrentImplant(int)));
 		connect(item, SIGNAL(ImplantChanged(ImplantItem*)), this, SLOT(OnImplantChanged(ImplantItem*)));
 		connect(item, SIGNAL(deleteImplant(ImplantItem*)), this, SLOT(OnDeleteImplant(ImplantItem*)));
-
+		connect(item, SIGNAL(parallelRadioButtonClicked(ImplantItem*)), this, SLOT(OnParallelRadioButton(ImplantItem*)));
 
 		//设置交互widget的中心
 		this->SetImplantInteractionWidget(item->m_ImplantFirstPoint, item->m_NormalOfTube, item->m_ImplantLength);
@@ -3806,6 +4238,13 @@ void DentalHelper::PickImplantPoint()
 		ui.BaseTableWidget->setColumnWidth(numOfImplant - 1, 130);
 		ui.BaseTableWidget->setCellWidget(0, numOfImplant - 1, item->GetBaseWidget());
 
+
+		ui.ParallelTableWidget->setRowCount(1);
+		ui.ParallelTableWidget->setRowHeight(0, 75);
+		ui.ParallelTableWidget->setColumnCount(numOfImplant);
+		ui.ParallelTableWidget->setColumnWidth(numOfImplant - 1, 130);
+		ui.ParallelTableWidget->setCellWidget(0, numOfImplant - 1, item->GetParalleWiget());
+
 		m_EventQtConnector->Disconnect(m_LowerRightInteractor, vtkCommand::RightButtonPressEvent, this, SLOT(PickImplantPoint()));
 
 		m_DrawImplantState = DrawImplantState::none;
@@ -3826,8 +4265,12 @@ void DentalHelper::PickImplantPoint()
 			var->CutInLowerLeftView(m_RotationPlane);
 		}
 		this->OnChange2Rotation();
-
+		for (int i=0;i<3;i++)
+		{
+			item->normalForGeneratingBase[i] = m_RotationPlane->GetNormal()[i];
+		}
 		item->GenerateBase();
+		item->CutInLowerLeftView(m_RotationPlane);
 
 		m_LowerLeftRenderer->ResetCamera();
 		m_LowerLeftRendWin->Render();
@@ -3888,6 +4331,172 @@ void DentalHelper::ReadImageFile(QString dir)
 		ui.ImageTabelWidget->setItem(numOfItem - 1, item->GetMainList().size(), LastText);
 	}
 }
+void DentalHelper::SaveDicomInformation(QDataStream& out, XDicomItem &data)
+{
+	out << data.patientName << data.patientGender << data.patientAge << data.SerialNum << data.patientID << data.date;
+	out << data.spacingX << data.spacingY << data.spacingZ << data.manufacturer << data.hospital;
+}
+
+void DentalHelper::SaveImages(QString filepath)
+{
+	QString fileName = filepath + ".manager";
+	QFile file(fileName);
+	if (!file.open(QIODevice::WriteOnly))
+	{
+		QMessageBox::information(this, tr("Unable to open file"),
+			file.errorString());
+		return;
+	}
+	QDataStream out(&file);
+	out.setVersion(QDataStream::Qt_5_7);
+	out << m_DicomList.size();
+	out << m_CurrentIndex;
+	for each (XDicomItem* var in m_DicomList)
+	{
+		this->SaveDicomInformation(out, *var);
+		QString temp;
+		QString vtiName = filepath + "_" + temp.setNum(m_DicomList.indexOf(var));
+		auto imageWriter = vtkSmartPointer<vtkXMLImageDataWriter>::New();
+		imageWriter->SetFileName(qPrintable(vtiName.append(".vti")));
+		imageWriter->SetDataModeToBinary();
+		imageWriter->SetInputData(var->GetImageData());
+		imageWriter->Write();
+	}
+
+}
+
+
+void DentalHelper::SaveImplants(QString filepath)
+{
+	QString fileName = filepath + ".implant";
+	QFile file(fileName);
+	if (!file.open(QIODevice::WriteOnly))
+	{
+		QMessageBox::information(this, tr("Unable to open file"),
+			file.errorString());
+		return;
+	}
+	QDataStream out(&file);
+	out.setVersion(QDataStream::Qt_5_7);
+	out << m_ImplantList.size();
+	for each (ImplantItem* var in m_ImplantList)
+	{
+		out << 1;
+		for (int i = 0; i < 3; i++)
+		{
+			out << var->m_ImplantFirstPoint[i];
+			out << var->m_ImplantSecondPoint[i];
+			out << var->m_ImplantColor[i];
+			out << var->normalOfBase[i];
+		}
+		out << var->m_ImplantDiameter;
+		out << var->m_ImplantLength;
+		out << var->GetBaseAngle();
+		out << var->GetBaseLength();
+	}
+}
+
+
+void DentalHelper::SavePrePlanning(QString filepath)
+{
+	QString fileName = filepath + ".setting";
+	QFile file(fileName);
+	if (!file.open(QIODevice::WriteOnly))
+	{
+		QMessageBox::information(this, tr("Unable to open file"),
+			file.errorString());
+		return;
+	}
+	QDataStream out(&file);
+	out.setVersion(QDataStream::Qt_5_7);
+	double centerOfPlane[3]; m_PlaneWidgetForArchCurve->GetCenter(centerOfPlane);
+	double normalOfPlane[3]; m_PlaneWidgetForArchCurve->GetNormal(normalOfPlane);
+	for (int i = 0; i < 3; i++)
+	{
+		out << centerOfPlane[i];
+		out << normalOfPlane[i];
+	}
+
+	//保存牙弓弧线
+	auto contourNodesOfArchCurve = vtkSmartPointer<vtkPolyData>::New();
+	m_ContourRepForArchCurve->GetNodePolyData(contourNodesOfArchCurve);
+	auto contourPointsOfArchCurve = vtkSmartPointer<vtkPoints>::New();
+	contourPointsOfArchCurve = contourNodesOfArchCurve->GetPoints();
+	int numOfPointsForArchCurve = contourPointsOfArchCurve->GetNumberOfPoints();
+	out << numOfPointsForArchCurve;
+	for (int i = 0; i < numOfPointsForArchCurve; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			out << contourPointsOfArchCurve->GetPoint(i)[j];
+		}
+	}
+	//保存左边神经
+	bool isLeftNurveExist = m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForLeftNurve);
+	out << isLeftNurveExist;
+	if (isLeftNurveExist)
+	{
+		auto contourNodesOfLeftNurve = vtkSmartPointer<vtkPolyData>::New();
+		m_ContourRepForLeftNurve->GetNodePolyData(contourNodesOfLeftNurve);
+		auto contourPointsOfLeftNurve = vtkSmartPointer<vtkPoints>::New();
+		contourPointsOfLeftNurve = contourNodesOfLeftNurve->GetPoints();
+		int numOfPointsForLeftNurve = contourPointsOfLeftNurve->GetNumberOfPoints();
+		out << numOfPointsForLeftNurve;
+		for (int i = 0; i < numOfPointsForLeftNurve; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				out << contourPointsOfLeftNurve->GetPoint(i)[j];
+			}
+		}
+	}
+	//保存右边神经
+	bool isRightNurveExist = m_ModelRenderer->GetActors()->IsItemPresent(m_ActorForRightNurve);
+	out << isRightNurveExist;
+	if (isRightNurveExist)
+	{
+		auto contourNodesOfRightNurve = vtkSmartPointer<vtkPolyData>::New();
+		m_ContourRepForRightNurve->GetNodePolyData(contourNodesOfRightNurve);
+		auto contourPointsOfRightNurve = vtkSmartPointer<vtkPoints>::New();
+		contourPointsOfRightNurve = contourNodesOfRightNurve->GetPoints();
+		int numOfPointsForLeftNurve = contourPointsOfRightNurve->GetNumberOfPoints();
+		out << numOfPointsForLeftNurve;
+		for (int i = 0; i < numOfPointsForLeftNurve; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				out << contourPointsOfRightNurve->GetPoint(i)[j];
+			}
+		}
+	}
+	//保存上颌模型
+	bool isUpProthesisExist= m_ModelRenderer->GetActors()->IsItemPresent(m_UpProthesisActor);
+	out << isUpProthesisExist;
+	if (isUpProthesisExist)
+	{
+		QString temp = "UpProthesis";
+		QString stlName = fileName + "_" + temp;
+		auto stlWriter = vtkSmartPointer<vtkSTLWriter>::New();
+		stlWriter->SetInputData(m_UpProthesisData);
+		stlWriter->SetFileTypeToBinary();
+		stlWriter->SetFileName(qPrintable(stlName));
+		stlWriter->Update();
+	}
+	//保存下颌模型
+	bool isLowerProthesisExist = m_ModelRenderer->GetActors()->IsItemPresent(m_DownProthesisActor);
+	out << isLowerProthesisExist;
+	if (isLowerProthesisExist)
+	{
+		QString temp = "LowerProthesis";
+		QString stlName = fileName + "_" + temp;
+		auto stlWriter = vtkSmartPointer<vtkSTLWriter>::New();
+		stlWriter->SetInputData(m_DownProthesisData);
+		stlWriter->SetFileTypeToBinary();
+		stlWriter->SetFileName(qPrintable(stlName));
+		stlWriter->Update();
+	}
+}
+
 void DentalHelper::SetActorsVisibilityInArchCurve(bool vis)
 {
 	if (!vis)
@@ -4202,6 +4811,9 @@ void DentalHelper::SetActorsVisibilityInRotation(bool vis)
 			m_CutActorForDownProthesisInRotation->VisibilityOff();
 		}
 
+		m_FirstRotateWidget->Off();
+		m_SecondRotateWidget->Off();
+		m_MoveWidget->Off();
 	}
 	else
 	{
@@ -4228,6 +4840,9 @@ void DentalHelper::SetActorsVisibilityInRotation(bool vis)
 		}
 		this->UpDateCamera(m_LowerLeftRenderer, m_RotationPlane->GetNormal(), 90);
 		m_LowerLeftRenderer->ResetCamera();
+		m_FirstRotateWidget->On();
+		m_SecondRotateWidget->On();
+		m_MoveWidget->On();
 	}
 
 	m_LowerLeftRendWin->Render();
@@ -4320,7 +4935,7 @@ void DentalHelper::SetImplantInteractionWidget(double* first, double* normal,dou
 	{	
 		m_FirstRotateWidget->On();
 		//设置交互函数
-		m_EventQtConnector->Connect(m_FirstRotateWidget, vtkCommand::InteractionEvent, this, SLOT(OnFirstRotateWidgetInteraction()));
+		m_EventQtConnector->Connect(m_FirstRotateWidget, vtkCommand::EndInteractionEvent, this, SLOT(OnFirstRotateWidgetInteraction()));
 	}
 
 
@@ -4335,7 +4950,7 @@ void DentalHelper::SetImplantInteractionWidget(double* first, double* normal,dou
 	{	
 		m_SecondRotateWidget->On();
 		//设置交互函数
-		m_EventQtConnector->Connect(m_SecondRotateWidget, vtkCommand::InteractionEvent, this, SLOT(OnSecondRotateWidgetInteraction()));
+		m_EventQtConnector->Connect(m_SecondRotateWidget, vtkCommand::EndInteractionEvent, this, SLOT(OnSecondRotateWidgetInteraction()));
 	}
 
 
@@ -4352,7 +4967,7 @@ void DentalHelper::SetImplantInteractionWidget(double* first, double* normal,dou
 	{	
 		m_MoveWidget->On();
 		//设置交互函数
-		m_EventQtConnector->Connect(m_MoveWidget, vtkCommand::InteractionEvent, this, SLOT(OnMoveWidgetInteraction()));
+		m_EventQtConnector->Connect(m_MoveWidget, vtkCommand::EndInteractionEvent, this, SLOT(OnMoveWidgetInteraction()));
 	}
 
 
@@ -4565,6 +5180,9 @@ void DentalHelper::SetViewModel2Preplan()
 	m_Change2Panaromic->setChecked(true);
 	m_Change2Coronal->setChecked(false);
 
+	ui.ChangeLowerRightButton->setText("Cross");
+	m_Change2Sagital->setChecked(false);
+	m_Change2Cross->setChecked(true);
 	//设定planewidget的point1和point2
 	double point1ForPlaneWidget[3], point2ForPlaneWidget[3], boundsOfProp[6];
 	m_VolumeActor->GetBounds(boundsOfProp);
